@@ -1,6 +1,4 @@
-# Weather-data
-
-Project Outline:
+# Weather-data Project Outline:
 
 # Datasets:
 * Weather, corresponding with location (latitude/longitude).
