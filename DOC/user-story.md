@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # user story for our Seattle project
 
 ## Case 1: Architect
