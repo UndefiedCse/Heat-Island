@@ -1,52 +1,66 @@
-import sys
 import rasterio
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
+import pyproj
 
-dsm_file = 'LiDAR/DSM/NT16NE_50CM_DSM_PHASE3.tif'
+# Specify the paths to the DTM and DSM GeoTIFF files
 dtm_file = 'LiDAR/DTM/NT16NE_50CM_DTM_PHASE3.tif'
+dsm_file = 'LiDAR/DSM/NT16NE_50CM_DSM_PHASE3.tif'
 
-with rasterio.open(dsm_file) as src_dsm, rasterio.open(dtm_file) as src_dtm:
-    dsm = src_dsm.read(1)
-    dtm = src_dtm.read(1)
+# Define the EPSG codes for the source (British National Grid) and target (WGS 84 - lat/lon) coordinate systems
+source_epsg = 'epsg:27700'
+target_epsg = 'epsg:4326'  # WGS 84
 
-height_map = dsm-dtm
+# Create a PyProj transformer for the conversion
+transformer = pyproj.Transformer.from_crs(source_epsg, target_epsg, always_xy=True)
 
-# Set up figure and axes for DTM visualization
+# Open the DTM and DSM files
+with rasterio.open(dtm_file) as src_dtm, rasterio.open(dsm_file) as src_dsm:
+    dtm_data = src_dtm.read(1)
+    dsm_data = src_dsm.read(1)
+    dtm_profile = src_dtm.profile  # Retrieve metadata for the DTM
+
+# Get the transform for converting pixel coordinates to lat/lon
+transform = src_dtm.transform
+
+# Calculate the latitudes and longitudes for all pixels
+rows, cols = dtm_data.shape
+x_coords, y_coords = np.meshgrid(np.arange(cols), np.arange(rows))
+x_coords_flat, y_coords_flat = x_coords.flatten(), y_coords.flatten()
+x_coords_meters, y_coords_meters = transform * (x_coords_flat, y_coords_flat)
+lon_values, lat_values = transformer.transform(x_coords_meters, y_coords_meters)
+
+# Reshape the height map and coordinates for plotting
+height_map = dsm_data - dtm_data
+lon_values = lon_values.reshape(rows, cols)
+lat_values = lat_values.reshape(rows, cols)
+
+# Set outlier values to 0
+height_map[(height_map < 0) | (height_map > 1000)] = 0
+
+# Plot the height map with latitude and longitude as the X and Y axes
 plt.figure(figsize=(8, 8))
-plt.imshow(dtm, cmap='terrain', extent=src_dtm.bounds, origin='upper')
+plt.imshow(height_map, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
 plt.colorbar(label='Elevation (meters)')
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
-plt.title('Digital Terrain Model (DTM)')
+plt.title('Height Map (DSM - DTM)')
 plt.show()
 
-# Set up figure and axes for DSM visualization
+# # Plot DSM
 plt.figure(figsize=(8, 8))
-plt.imshow(dsm, cmap='terrain', extent=src_dsm.bounds, origin='upper')
+plt.imshow(dsm_data, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
 plt.colorbar(label='Elevation (meters)')
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
 plt.title('Digital Surface Model (DSM)')
 plt.show()
 
-
-plt.figure(figsize=(8,8))
-
-cmap = plt.get_cmap('gray')
-
-# Display the height map as an image
-plt.imshow(height_map, cmap=cmap, extent=src_dsm.bounds, origin='upper')
-
-# Add a color bar for reference
+# Plot DTM
+plt.figure(figsize=(8, 8))
+plt.imshow(dtm_data, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
 plt.colorbar(label='Elevation (meters)')
-
-# Set labels for the X and Y axes
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
-
-# Set a title for the plot
-plt.title('Height Map (DSM - DTM)')
-
-# Show the plot
+plt.title('Digital Terrain Model (DTM)')
 plt.show()
