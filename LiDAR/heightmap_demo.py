@@ -37,6 +37,7 @@ lat_values = lat_values.reshape(rows, cols)
 
 # Set outlier values to 0
 height_map[(height_map < 0) | (height_map > 1000)] = 0
+dtm_data[(dtm_data<0)] =0
 
 # Plot the height map with latitude and longitude as the X and Y axes
 plt.figure(figsize=(8, 8))
@@ -47,7 +48,7 @@ plt.ylabel('Latitude')
 plt.title('Height Map (DSM - DTM)')
 plt.show()
 
-# # Plot DSM
+# Plot DSM
 plt.figure(figsize=(8, 8))
 plt.imshow(dsm_data, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
 plt.colorbar(label='Elevation (meters)')
