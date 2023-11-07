@@ -8,9 +8,12 @@ Seattle Metropolitan Area (?)
 * Building height, corresponding with location (latitude/longitude).
 
 - Comment by LH: Building height acts as the causal factor, whereas temperature is the result.
+- Comment by YZ: Weather in a fixed time window (say one work, 3 days before and after the target date)? This could help reduce short-term variation of temperature, etc.
+- Comment by YZ: Added dataset: Building footprint info. Landuse in term of building/ water/ green area.
 - NOTE: Why use building height?
   - I think we should compare the local temperatures to the average city temperature. Then, we can justify using the building height as affecting the temperature in some way, compared to the average?
   - Comment by LH: The concept of "the average city temperature" is indeed challenging to conceptualize, as it raises questions about the specific definition of a 'city' and the selection criteria for the cities in question. A potentially more illustrative comparison might involve contrasting the temperature of an urban area with that of its adjacent rural regions. This approach would underpin our hypothesis, positing that building height significantly influences temperature variations.
+  - Comment by YZ: Ideally, I would expect our model to be robust enough: user provide a city dataset, and our model output a map of the tempraature of a larger context, showing how the urban built environemnt influences tempreature. In this regard, we need the morphology of city (can be height and building fotprint , or more deatiled lidar), and weather in a larger context.
 
 # What are we trying to do?
 * Correlate building height with the local weather
