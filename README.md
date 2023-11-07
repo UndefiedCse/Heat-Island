@@ -17,6 +17,7 @@ Seattle Metropolitan Area (?)
 
 # What are we trying to do?
 * Correlate building height with the local weather
+* Comment by YZ: local weather (temperature at a given pt) as dependent variable, building evnironment info(s) (building foortprint, water and green surface, building height, terrain, etc.) as independent variables.
 
 - NOTE: Why not building shapes?
   - I think this would be interesting, but possibly too difficult to do. If we can figure out how to convert this information into a CSV, or learn how to correlate shapes (i.e. lidar) directly into a correlation, this might be fine too. This would make parsing the data a smidge easier maybe?
