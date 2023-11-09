@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import pyproj
 
 # Specify the paths to the DTM and DSM GeoTIFF files
-dtm_file = 'LiDAR/DTM/NT16NE_50CM_DTM_PHASE3.tif'
-dsm_file = 'LiDAR/DSM/NT16NE_50CM_DSM_PHASE3.tif'
+dsm_file = 'demo/data/dsm/NT27SW_50CM_DSM_PHASE5.tif'
+dtm_file = 'demo/data/dtm/NT27SW_50CM_DTM_PHASE5.tif'
 
 # Define the EPSG codes for the source (British National Grid) and target (WGS 84 - lat/lon) coordinate systems
 source_epsg = 'epsg:27700'
@@ -39,23 +39,23 @@ lat_values = lat_values.reshape(rows, cols)
 height_map[(height_map < 0) | (height_map > 1000)] = 0
 dtm_data[(dtm_data<0)] =0
 
-# Plot the height map with latitude and longitude as the X and Y axes
-plt.figure(figsize=(8, 8))
-plt.imshow(height_map, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
-plt.colorbar(label='Elevation (meters)')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.title('Height Map (DSM - DTM)')
-plt.show()
+# # Plot the height map with latitude and longitude as the X and Y axes
+# plt.figure(figsize=(8, 8))
+# plt.imshow(height_map, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
+# plt.colorbar(label='Elevation (meters)')
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+# plt.title('Height Map (DSM - DTM)')
+# plt.show()
 
-# Plot DSM
-plt.figure(figsize=(8, 8))
-plt.imshow(dsm_data, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
-plt.colorbar(label='Elevation (meters)')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.title('Digital Surface Model (DSM)')
-plt.show()
+# # Plot DSM
+# plt.figure(figsize=(8, 8))
+# plt.imshow(dsm_data, cmap='terrain', extent=[lon_values.min(), lon_values.max(), lat_values.min(), lat_values.max()], origin='upper', vmin=0.)
+# plt.colorbar(label='Elevation (meters)')
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+# plt.title('Digital Surface Model (DSM)')
+# plt.show()
 
 # Plot DTM
 plt.figure(figsize=(8, 8))

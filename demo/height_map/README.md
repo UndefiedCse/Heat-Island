@@ -8,16 +8,27 @@ I put bash file for downloading sample data. `NT27SE` is a smaller map with ~50M
 ## Performance issue
 The coordinate system used in the dataset is not in latitude and longitude. A coordinate transformation is required using `pyproj` package but this process is a bottleneck in this code.
 
+## Datamap with no missing data
+If you choose dataset from `phase 5`, there is no missing data. Here is some example from Edinburgh.
+![p5 dsm full](pic/dsm_full_p5.png)
+![p5 dtm full](pic/dtm_full_p5.png)
+![p5 hmap full](pic/hmap_full_p5.png)
+
+Zoom in
+![p5 dsm home](pic/dsm_home_p5.png)
+![p5 dtm home](pic/dtm_home_p5.png)
+![p5 hmap home](pic/hmap_home_p5.png)
+
 ## DSM, DTM, Height map
 the area is pretty suburban and there is no tall building in the map. Most trees are taller than house in the map.
-![DSM full map](dsm_full.png)
-![DTM full map](dtm_full.png)
-![Height map](hmap_full.png)
+![DSM full map](pic/dsm_full.png)
+![DTM full map](pic/dtm_full.png)
+![Height map](pic/hmap_full.png)
 There are some missing elevation point in DTM map.
-![DSM missing point](dsm_missing.png)
-![DTM missing point](dtm_missing.png)
-![Height map with missing point](hmap_missing.png)
+![DSM missing point](pic/dsm_missing.png)
+![DTM missing point](pic/dtm_missing.png)
+![Height map with missing point](pic/hmap_missing.png)
 Basic shape of house
-![DSM village](dsm_home.png)
-![DTM village](dtm_home.png)
-![Height map village](hmap_home.png)
+![DSM village](pic/dsm_home.png)
+![DTM village](pic/dtm_home.png)
+![Height map village](pic/hmap_home.png)
