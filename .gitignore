@@ -163,4 +163,5 @@ cython_debug/
 *.tif
 *.geotif
 *.las 
-*.laz 
+*.laz
+*.csv 
