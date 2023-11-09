@@ -1,5 +1,4 @@
 echo Making directory
-cd ..
 mkdir -p data
 cd data
 mkdir -p dsm

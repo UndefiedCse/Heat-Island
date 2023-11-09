@@ -4,13 +4,16 @@ import numpy as np
 import pandas as pd
 
 # Path to .tif files
-path = 'demo/tif2csv/DTM/NT16NE_50CM_DTM_PHASE3.tif'
+input_path = 'demo/data/dsm/NT27SW_50CM_DSM_PHASE5.tif'
+
+# Output to the same folder with same name but different format
+output_path = input_path[:-3]+'csv'
 
 # Choose resampling type 
 # ['Nearest-neighbor':nearest, 'Bilinear':bilinear, 'Cubic':cubic]
 sampling = Resampling.cubic
 
-with rasterio.open(path) as src:
+with rasterio.open(input_path) as src:
     # Read metadata
     transform = src.transform
     crs = src.crs
@@ -59,4 +62,4 @@ with rasterio.open(path) as src:
 
         df[f'band_{band_id}'] = dst_array.flatten()
     
-    df.to_csv('demo/tif2csv/DTM/NT16NE_50CM_DTM_PHASE3.csv',index=False)
+    df.to_csv(output_path,index=False)
