@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import pyproj
 
 # Specify the paths to the DTM and DSM GeoTIFF files
-dtm_file = 'LiDAR/DTM/NT16NE_50CM_DTM_PHASE3.tif'
-dsm_file = 'LiDAR/DSM/NT16NE_50CM_DSM_PHASE3.tif'
+dtm_file = 'demo/tif2csv/DTM/NT27SE_50CM_DTM_PHASE3.tif'
+dsm_file = 'demo/tif2csv/DSM/NT27SE_50_DSM_PHASE3.tif'
 
 # Define the EPSG codes for the source (British National Grid) and target (WGS 84 - lat/lon) coordinate systems
 source_epsg = 'epsg:27700'
