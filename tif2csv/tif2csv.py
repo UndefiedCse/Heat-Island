@@ -5,6 +5,21 @@ import pandas as pd
 from os import path
 
 def tif2csv(input_path:str,output_path:str='',overwrite:bool=False):
+    """Function used to convert .tif file to .csv file
+
+    Args:
+        input_path (str): relative path for input file
+        output_path (str, optional): relative path for output file. Defaults to ''.
+        overwrite (bool, optional): Whether do you want to overwrite file (not implement). Defaults to False.
+
+    Raises:
+        ValueError: If input file does not exist
+        ValueError: If output file exist and does not allow to overwrite
+        ValueError: If request for save file but directory does not exist
+
+    Returns:
+        dataframe: dataframe of .tif file (lat,long,band_1,band_2,...)
+    """
     # Check whether input file exist
     if not path.isfile(input_path):
         raise ValueError("Selected file does not exist")
@@ -64,4 +79,4 @@ def tif2csv(input_path:str,output_path:str='',overwrite:bool=False):
             df[f'band_{band_id}'] = dst_array.flatten()
         if output_path != "":
             df.to_csv(output_path,index=False)
-    pass
+        return df
