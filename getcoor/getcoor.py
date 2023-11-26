@@ -1,15 +1,29 @@
 """This module is used to get coordinate from user input and
 check whether the input is inside the boundary
 """
-import folium
 import json
-import webbrowser
 import os
+import webbrowser
+import folium
 from shapely.geometry import Polygon,GeometryCollection
-from shapely import contains_xy
 import pyperclip
 
 def make_collection(features:list):
+    """Make GeometryCollection for locating boundary
+
+    Args:
+        features (list): list of features
+
+    Raises:
+        ValueError: There is no data in features
+        ValueError: Unexpected geojson format
+        ValueError: No 'geometry' as key in each feature
+        ValueError: feature['geometry'] is not a dictionary 
+        ValueError: No 'coordinates' as a key in feature['geometry']
+
+    Returns:
+        GeometryCollection: Set of polygon containing city boundary
+    """
     res = []
     if not isinstance(features,list):
         features = list(features)
@@ -30,6 +44,21 @@ def make_collection(features:list):
     return GeometryCollection(res)
 
 def open_browser(json_path:str,output_dir:str=''):
+    """Open browser for user to select point and copy its coordinate to clipboard
+
+    Args:
+        json_path (str): path to city boundary
+        output_dir (str, optional): directory for saving local html file. Defaults to ''.
+
+    Raises:
+        ValueError: if output_dir directory does not exist
+        ValueError: input .json file does not exist
+        ValueError: Unexpected file format
+        ValueError: Unexpected .json file structure
+
+    Returns:
+        str: path to local html
+    """
     if not isinstance(output_dir,str):
         output_dir = str(output_dir)
     if output_dir != '':
@@ -43,7 +72,7 @@ def open_browser(json_path:str,output_dir:str=''):
         raise ValueError(".geojson file does not exist")
     if json_path[-4:].lower() != 'json':
         raise ValueError("Invalid file type: Expect .json or .geojson")
-    with open(json_path,'r') as f:
+    with open(json_path,'r',encoding='utf-8') as f:
         js = json.load(f)
     if not 'features' in js.keys():
         raise ValueError("Unexpected json structure")
@@ -67,27 +96,44 @@ def open_browser(json_path:str,output_dir:str=''):
     html_path = output_dir+'get_coordinate.html'
     m.save(html_path)
     webbrowser.open_new_tab(html_path)
-    return geocollection,html_path
+    return html_path
 
-def main(path:str,temp_dir:str=''):
+def select_coordinate(path:str,temp_dir:str='',save_html:bool=False):
+    """Main function for selecting coordinate
+
+    Args:
+        path (str): path to city boundary
+        temp_dir (str, optional): directory for saving local html file. Defaults to ''.
+        save_html (boll, optional): choose whether to save html or delete after complete choosing.
+                                    Default to ''.
+
+    Raises:
+        ValueError: .json file does not exist
+
+    Returns:
+        x (float): longitude of the chosen point
+        y (float): latitude of the chosen point
+    """
     if not isinstance(path,str):
         path = str(path)
     if not os.path.isfile(path):
         raise ValueError("Boundary file does not exist")
-    geo_data,html_path = open_browser(path,temp_dir)
+    html_path = open_browser(path,temp_dir)
     for i in range(20):
         respond = ''
         print(f'Attempt {i}')
         raw_output = pyperclip.waitForNewPaste()
-        coor = raw_output[:raw_output.rfind(']')+1]
-        coor = eval(coor)
-        while not respond in ('y','n'):
-            respond = input(f"Here is coordinate {coor}\n Enter [y] if satisfied.\n Enter [n] to retry\n")
+        y = float(raw_output[raw_output.find(','):raw_output.rfind(']')+1])
+        x = float(raw_output[:raw_output.find(',')])
+        while respond not in ('y','n'):
+            respond = input(f"""Here is coordinate ({x},{y})\n Enter [y] if satisfied.
+                            \n Enter [n] to retry\n""")
             if respond.lower() == 'y':
                 break
-            elif respond.lower() == 'n':
+            if respond.lower() == 'n':
                 break
         if respond.lower() == 'y':
             break
-    # os.remove(html_path)
-    return coor
+    if not save_html:
+        os.remove(html_path)
+    return x,y
