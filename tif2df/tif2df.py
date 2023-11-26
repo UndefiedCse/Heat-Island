@@ -2,15 +2,15 @@ import rasterio
 from rasterio.warp import calculate_default_transform,reproject,Resampling
 import numpy as np
 import pandas as pd
-from os import path
+import os
 
-def tif2csv(input_path:str,output_path:str='',overwrite:bool=False):
-    """Function used to convert .tif file to .csv file
+def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
+    """Function used to convert .tif file to dataframe with option to save as .csv
 
     Args:
         input_path (str): relative path for input file
         output_path (str, optional): relative path for output file. Defaults to ''.
-        overwrite (bool, optional): Whether do you want to overwrite file (not implement). Defaults to False.
+        overwrite (bool, optional): Whether do you want to overwrite file. Defaults to False.
 
     Raises:
         ValueError: If input file does not exist
@@ -21,12 +21,12 @@ def tif2csv(input_path:str,output_path:str='',overwrite:bool=False):
         dataframe: dataframe of .tif file (lat,long,band_1,band_2,...)
     """
     # Check whether input file exist
-    if not path.isfile(input_path):
+    if not os.path.isfile(input_path):
         raise ValueError("Selected file does not exist")
     # Check for output file so it don't overwrite exist file
-    if path.isfile(output_path) and overwrite == False:
+    if os.path.isfile(output_path) and overwrite == False:
         raise ValueError("Output file exist! rename outputfile or set overwrite to True")
-    if output_path != '' and not path.isdir(output_path[:output_path.rfind('/')+1]):
+    if output_path != '' and not os.path.isdir(output_path[:output_path.rfind('/')+1]):
         raise ValueError("Output directory does not exist")
     sampling = Resampling.cubic
     with rasterio.open(input_path) as src:
@@ -78,5 +78,7 @@ def tif2csv(input_path:str,output_path:str='',overwrite:bool=False):
 
             df[f'band_{band_id}'] = dst_array.flatten()
         if output_path != "":
+            if os.path.isfile(output_path):
+                os.remove(output_path)
             df.to_csv(output_path,index=False)
         return df
