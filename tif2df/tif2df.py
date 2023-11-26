@@ -1,10 +1,14 @@
+"""This module is used to convert geographic data in .tif format to dataframe
+User can choose whether to save converted data to .csv format. **Warning: file size can be large**
+"""
+import os
 import rasterio
 from rasterio.warp import calculate_default_transform,reproject,Resampling
 import numpy as np
 import pandas as pd
-import os
 
-def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
+def tif2df(input_path:str,output_path:str=''
+            ,overwrite:bool=False):
     """Function used to convert .tif file to dataframe with option to save as .csv
 
     Args:
@@ -24,7 +28,7 @@ def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
     if not os.path.isfile(input_path):
         raise ValueError("Selected file does not exist")
     # Check for output file so it don't overwrite exist file
-    if os.path.isfile(output_path) and overwrite == False:
+    if os.path.isfile(output_path) and overwrite is False:
         raise ValueError("Output file exist! rename outputfile or set overwrite to True")
     if output_path != '' and not os.path.isdir(output_path[:output_path.rfind('/')+1]):
         raise ValueError("Output directory does not exist")
@@ -32,11 +36,10 @@ def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
     with rasterio.open(input_path) as src:
         # Read metadata
         transform = src.transform
-        crs = src.crs
-        left,bot,right,top = src.bounds
         # Calculate the transformation to 'epsg:4326'
         dst_transform, width, height = calculate_default_transform(
-            crs, 'epsg:4326', src.width, src.height, left=left,bottom=bot,right=right,top=top
+            src.crs, 'epsg:4326', src.width, src.height, left=src.bounds[0]
+            ,bottom=src.bounds[1],right=src.bounds[2],top=src.bounds[3]
         )
 
         # Copy metadata and update
@@ -53,12 +56,12 @@ def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
             np.arange(width)*dst_transform[0]+dst_transform[2],
             np.arange(height)*dst_transform[4]+dst_transform[5]
         )
-        lat_flat = lat.flatten()
-        lon_flat = lon.flatten()
+        lat = lat.flatten()
+        lon = lon.flatten()
 
         df = pd.DataFrame({
-            'lat': lat_flat,
-            'lon': lon_flat
+            'lat': lat,
+            'lon': lon
         })
         # loop through all band (mostly 1)
         for band_id in range(1,src.count +1):
@@ -70,7 +73,7 @@ def tif2df(input_path:str,output_path:str='',overwrite:bool=False):
                 rasterio.band(src,band_id),
                 dst_array,
                 transform,
-                src_crs=crs,
+                src_crs=src.crs,
                 dst_transform=dst_transform,
                 dst_crs='epsg:4326',
                 resampling=sampling

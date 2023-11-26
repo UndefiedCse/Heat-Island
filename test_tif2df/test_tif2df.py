@@ -18,7 +18,7 @@ def compare_file(fn1,fn2):
     """
     if not os.path.isfile(fn1) or not os.path.isfile(fn2):
         raise ValueError("Some files does not exist")
-    with open(fn1, 'r') as file1, open(fn2, 'r') as file2:
+    with open(fn1, 'r',encoding='utf-8') as file1, open(fn2, 'r',encoding='utf-8') as file2:
         return file1.read() == file2.read()
 
 def remove_file(fn):
@@ -30,7 +30,7 @@ def remove_file(fn):
     if os.path.isfile(fn):
         os.remove(fn)
 
-class Test_tif2df(unittest.TestCase):
+class Testtif2df(unittest.TestCase):
     """This class manages unit test for tif2df function
     """
     finput_path = 'test_tif2df/float.tif'
@@ -40,6 +40,8 @@ class Test_tif2df(unittest.TestCase):
     shoutput_path = 'test_tif2df/shade.csv'
     sh_sol = 'test_tif2df/shade_sol.csv'
     def test_smoke(self):
+        """Simple Smoke test on float.tif
+        """
         remove_file(self.foutput_path)
         overwrite = False
         tif2df(self.finput_path,self.foutput_path,overwrite)
@@ -51,7 +53,7 @@ class Test_tif2df(unittest.TestCase):
         input_path = []
         with self.assertRaises(TypeError):
             tif2df(input_path)
-    
+
     def test_input_nofile(self):
         """Function should return ValueError when input file does not exist
         """
