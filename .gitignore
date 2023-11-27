@@ -160,7 +160,6 @@ cython_debug/
 #.idea/
 
 # Data file
-*.tif
 *.geotif
 *.las 
 *.laz
