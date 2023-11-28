@@ -3,7 +3,7 @@ Run this file from home directory to avoid error.
 """
 import unittest
 import os
-from tif2df.tif2df import tif2df
+from heat_island.tif2df.tif2df import tif2df
 
 def compare_file(fn1,fn2):
     """Simple function for file comparison
@@ -33,12 +33,12 @@ def remove_file(fn):
 class Testtif2df(unittest.TestCase):
     """This class manages unit test for tif2df function
     """
-    finput_path = 'test_tif2df/float.tif'
-    foutput_path = 'test_tif2df/float.csv'
-    f_sol = 'test_tif2df/float_sol.csv'
-    shinput_path = 'test_tif2df/shade.tif'
-    shoutput_path = 'test_tif2df/shade.csv'
-    sh_sol = 'test_tif2df/shade_sol.csv'
+    finput_path = 'tests/test_tif2df/float.tif'
+    foutput_path = 'tests/test_tif2df/float.csv'
+    f_sol = 'tests/test_tif2df/float_sol.csv'
+    shinput_path = 'tests/test_tif2df/shade.tif'
+    shoutput_path = 'tests/test_tif2df/shade.csv'
+    sh_sol = 'tests/test_tif2df/shade_sol.csv'
     def test_smoke(self):
         """Simple Smoke test on float.tif
         """
