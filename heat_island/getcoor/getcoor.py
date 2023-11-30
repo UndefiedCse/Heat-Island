@@ -123,8 +123,8 @@ def select_coordinate(path:str,temp_dir:str='',save_html:bool=False):
         respond = ''
         print(f'Attempt {i}')
         raw_output = pyperclip.waitForNewPaste()
-        y = float(raw_output[raw_output.find(','):raw_output.rfind(']')+1])
-        x = float(raw_output[:raw_output.find(',')])
+        y = float(raw_output[raw_output.find(','):raw_output.rfind(']')])
+        x = float(raw_output[1:raw_output.find(',')])
         while respond not in ('y','n'):
             respond = input(f"""Here is coordinate ({x},{y})\n Enter [y] if satisfied.
                             \n Enter [n] to retry\n""")
