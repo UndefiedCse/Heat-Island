@@ -18,10 +18,25 @@ City of Seattle (city boundary is acquired from [Seattle GeoData](https://data-s
 
 
 ## Software dependencies and license information
+### Programming language:
+- Python version 3.10 and above
+
 ### Python packages needed:
 - pandas
-- NumPy
-- sklearn
+- numpy
+- matplotlib
+- rasterio
+- pyproj
+- geopandas
+- geojson
+- ellipsis
+- h3pandas
+- h3-py
+- mercantile
+- folium
+- rasterstats
+- pyperclip
+- scikit-learn
 
 ### License Information:
 The MIT License is a permissive free software license originating at the Massachusetts Institute of Technology (MIT). As a permissive license, it puts only very limited restriction on reuse and has therefore an excellent license compatibility. 
