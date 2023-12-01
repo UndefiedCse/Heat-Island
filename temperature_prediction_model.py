@@ -24,7 +24,8 @@ X = df_cleaned[['longitude', 'latitude', 'height_avg', 'terrain_mean']]
 y = df_cleaned['temperature']
 
 # Splitting the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+                                                    random_state=42)
 
 # Creating the model
 model = LinearRegression()
@@ -42,4 +43,5 @@ r2 = r2_score(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
 print(f'R-squared: {r2}')
 
-# Use model.predict([[longitude, latitude, height_avg, terrain_mean]]) to make new predictions
+# Use model.predict([[longitude, latitude, height_avg, terrain_mean]])
+# to make new predictions
