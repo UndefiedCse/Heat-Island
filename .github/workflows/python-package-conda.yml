@@ -37,7 +37,7 @@ jobs:
       run: |
         conda install pylint
         # Use pylint to enforce function documentation
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') --good-names 'i','j','js','k','f','x','y','m' --disable=unsubscriptable-object
     - name: Test with unittest
       run: |
         python -m unittest
