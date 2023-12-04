@@ -1,11 +1,14 @@
+"""test python file for prediction
+"""
 import pandas as pd
 import geopandas as gpd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
 
 # Load your GeoJSON dataset
-gdf = gpd.read_file('example_aggr_hexagon.geojson')
+gdf = gpd.read_file('data/example_aggr_hexagon.geojson')
 
 # Selecting the features and target variable
 df = pd.DataFrame({
@@ -17,17 +20,19 @@ df = pd.DataFrame({
 })
 
 # Drop the rows where at least one element is missing
-df_cleaned = df.dropna()
+DF_CLEANED = df.dropna()
 
 # Selecting the features and target variable
-X = df_cleaned[['longitude', 'latitude', 'height_avg', 'terrain_mean']]
-y = df_cleaned['temperature']
+X = DF_CLEANED[['longitude', 'latitude', 'height_avg', 'terrain_mean']]
+y = DF_CLEANED['temperature']
+
+model = KNeighborsRegressor()
+scaler = StandardScaler()
 
 # Splitting the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+                                                    random_state=42)
 
-# Creating the model
-model = LinearRegression()
 
 # Training the model
 model.fit(X_train, y_train)
@@ -42,4 +47,5 @@ r2 = r2_score(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
 print(f'R-squared: {r2}')
 
-# Use model.predict([[longitude, latitude, height_avg, terrain_mean]]) to make new predictions
+# Use model.predict([[longitude, latitude, height_avg, terrain_mean]])
+# to make new predictions
