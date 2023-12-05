@@ -7,7 +7,7 @@ import time
 
 from heat_island.getcoor import getcoor
 
-cities = {"Seattle": (47.606, -122.333)}
+cities = {"seattle": (47.606, -122.333)}
 existing = False
 
 # If users want to input another set of data (new city)
@@ -16,7 +16,7 @@ print(*cities)
 response = input("What city would you like to view? Type 'New' for a new city.")
 
 while existing == False:
-    if cities.has_key(response.lower()) :
+    if response.lower() in cities :
         city = response
         # How to get access to the info needed for using Seattle map + Weather?
         existing = True
@@ -33,6 +33,7 @@ while existing == False:
         existing = True
     else:
         print("This is not a valid response. Please either type a city name or 'New'.")
+        response = input("What city would you like to view? Type 'New' for a new city.")
 
 print("Please display both this page, and the following map simultaneously.")
 time.sleep(2)  #Pauses to allow readers to read the message above
