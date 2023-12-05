@@ -1,13 +1,24 @@
 import pandas as pd
 import os
 
-def preprocess_csv(input_file_name):
+def input_file_from_data_dir(input_file_name):
     
     # Get the absolute path to the directory where data_process.py is located
     current_directory = os.path.dirname(os.path.abspath(__file__))
 
     # Construct the file path for weather_Seattle.csv inside the 'data' subdirectory
     input_file_path = os.path.join(current_directory, '..', 'data', input_file_name)
+
+    return input_file_path
+
+'''
+# Example usage
+print(input_file_from_data_dir('weather_Seattle.csv'))
+'''
+
+def preprocess_csv(input_file_name):
+    
+    input_file_path = input_file_from_data_dir(input_file_name)
 
     # Load the CSV file into a DataFrame
     df = pd.read_csv(input_file_path)
