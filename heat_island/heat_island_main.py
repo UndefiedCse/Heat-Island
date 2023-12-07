@@ -6,7 +6,8 @@ import folium
 import time
 
 from getcoor.getcoor import select_coordinate
-from data_processing import input_file_from_data_dir
+from data_process import input_file_from_data_dir
+from geo_process import create_hexagon
 
 cities = {"seattle": (47.606, -122.333)}
 existing = False
@@ -46,22 +47,40 @@ while existing == False:
 print("Please display both this page, and the following map simultaneously.")
 time.sleep(2)  #Pauses to allow readers to read the message above
 # Possibly loop, starting from here.
-# Call functions from getcoor.py here! Returns latitude/longitude coordinates.
 
+# Finding necessary directories
 weatherFileDir = input_file_from_data_dir(city + "_weather")
 boundaryFileDir = input_file_from_data_dir(city + "_boundary")
 buildingFileDir = input_file_from_data_dir(city + "_building")
 
-print("Please select the coordinate where you want to run the weather model.")
-select_coordinate(boundaryFileDir)
+morePoints = True
+while morePoints:
+    # Returns latitude/longitude coordinates.
+    print("Please select the coordinate where you want to run the weather model.")
+    x, y = select_coordinate(boundaryFileDir)
+    regionalCoord = create_hexagon(x, y, radius)
 
-# Call the ML model here?
-# Call functions for applying ML here
+    # Call regionalCoord -> height here
 
-print("Please hold on as the algorithm computes the expected temperature within the region.")
+    # Call the ML model here?
 
-# Display data - What will it look like? Will create a folium pop-up regardless; can be a graph
-# or (various heights with various temperature predictions), or just a line of text as popup
-# and a text here directly.
-# Chart visualization look here: https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
-# Look at the Vega/Vega Lite Charts
+    # Call functions for applying ML here
+    print("Please hold on as the algorithm computes the expected temperature within the region.")
+
+    # Display data - What will it look like? Will create a folium pop-up regardless; can be a graph
+    # or (various heights with various temperature predictions), or just a line of text as popup
+    # and a text here directly.
+    # Chart visualization look here: https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
+    # Look at the Vega/Vega Lite Charts
+    more = input("Would you like to test more points? (y/n)")
+    for i in range(3):
+        if more.lower() == "n":
+            morePoints = False
+            break
+        elif more.lower() == "y":
+            break
+        else:
+            if i == 2:
+                print("We will stop running after another typo.")
+            more = input("That's not a valid response. Please try again.")
+        
