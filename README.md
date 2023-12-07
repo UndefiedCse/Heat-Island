@@ -17,7 +17,7 @@ The **heat_island** ... (tentative, describe the application of our package)
 City of Seattle (city boundary is acquired from [Seattle GeoData](https://data-seattlecitygis.opendata.arcgis.com/datasets/c5f3575dd7d545ada27064c74ac74f52_0/explore?location=47.622532%2C-122.278830%2C11.00))
 
 
-## Software dependencies and license information
+## Software dependencies
 ### Programming language:
 - Python version 3.10 and above
 
@@ -38,17 +38,19 @@ City of Seattle (city boundary is acquired from [Seattle GeoData](https://data-s
 - pyperclip
 - scikit-learn
 
-### License Information:
-The MIT License is a permissive free software license originating at the Massachusetts Institute of Technology (MIT). As a permissive license, it puts only very limited restriction on reuse and has therefore an excellent license compatibility. 
 
-
-## Subpackage description
+## Description
 
 ### Data processing
+Data processing was carried out using the scripts `data_process.py`, `height_acquire.py`, and `geo_process.py`. These scripts are designed to preprocess `.csv` and `.geojson` files, ensuring that they meet our specific requirements.
 
 ### Model training and testing
 
 ### User interaction / visualization
+
+
+## Installation
+- Create a virtual environment based on the environment dependency. `conda env create -f environment.yml`
 
 ## Directory Structure
 ```
