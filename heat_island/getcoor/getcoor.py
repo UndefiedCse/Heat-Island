@@ -98,8 +98,8 @@ def open_browser(json_path: str, output_dir: str = ''):
         zoom_start=12
     )
     m.add_child(
-        folium.ClickForLatLng(format_str='''"[" + lat + "," + lng + "]
-                                             Please, check terminal"''')
+        folium.ClickForLatLng(
+            format_str='"[" + lat + "," + lng + "] Please, check terminal"')
     )
     folium.GeoJson(js).add_to(m)
     html_path = output_dir+'get_coordinate.html'
