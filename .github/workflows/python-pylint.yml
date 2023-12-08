@@ -1,0 +1,44 @@
+name: Python Package pylint
+
+on: 
+  push: 
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      loglevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+    - name: Lint with pylint
+      run: |
+        conda install pylint
+        # Use pylint to enforce function documentation
+        pylint $(git ls-files '*.py') --good-names 'i','j','js','k','f','x','y','m' --disable=unsubscriptable-object
