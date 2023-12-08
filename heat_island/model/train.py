@@ -6,8 +6,8 @@ import joblib
 import geopandas as gpd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsRegressor
+# from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score
 # from heat_island.data_process import input_file_from_data_dir
 
 
@@ -47,16 +47,17 @@ def main(data_path: str, features: list = None,
         features = get_keys()
     x, y = clean_data(data_path, features, target)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2,
-                                                        random_state=0
-                                                        )
+                                                        random_state=0)
     scale = StandardScaler()
     scale.fit(x_train)
+    # Change here if performance is bad
     model = KNeighborsRegressor()
-    model.fit(x_train, y_train)
+    # model = LinearRegression()
+    model.fit(scale.transform(x_train), y_train)
     print("Training successful")
-    train_score = accuracy_score(y_train, predict(model, scale, x_train))
+    train_score = model.score(x_train, y_train)
     print(f"Your train score is {train_score}")
-    test_score = accuracy_score(y_test, predict(model, scale, x_test))
+    test_score = model.score(x_test, y_test)
     print(f'Your test score is {test_score}')
     save_model(model, scale, save_path, fname)
 
@@ -96,9 +97,10 @@ def clean_data(data_path: str, features: list, target: str):
     if data_path[data_path.rfind('.')+1:] != 'geojson':
         raise ValueError("Incorrect file format: Expect '.geojson'")
     gdf = gpd.read_file(data_path)
-    if not set(features+[target]) <= gdf.columns:
+    all_col = features+[target]
+    if not all(col in gdf.columns for col in all_col):
         raise KeyError("Incorrect dataset format")
-    gdf = gdf[features, target].dropna()
+    gdf = gdf[all_col].dropna()
     if len(gdf) < 5:
         raise ValueError("Dataset too small")
     return gdf[features], gdf[target]
@@ -130,14 +132,19 @@ def save_model(model, scaler, direc: str, fname: str):
         if 'regressor' != getattr(model, '_estimator_type'):
             raise TypeError("model is not regressor")
     except Exception as exc:
-        raise AttributeError('There is no "_estimator_type"attribute') from exc
+        raise AttributeError('''There is no
+ "_estimator_type" attribute''') from exc
     if not isinstance(direc, str):
         direc = str(direc)
-    if not os.path.isdir(direc):
-        raise ValueError("Output path does not exist")
-    if direc[-1] != '/':
-        direc = dir+'/'
+    if len(direc) != 0:
+        if not os.path.isdir(direc):
+            raise ValueError("Output path does not exist")
+        if direc[-1] != '/':
+            direc = dir+'/'
     if os.path.isfile(direc+fname):
         raise ValueError("Output file exist, change file name")
     output = {'model': model, 'scaler': scaler}
     joblib.dump(output, direc+fname)
+
+
+main('data/example_aggr_hexagon (2).geojson')
