@@ -4,7 +4,7 @@ Starting python page for Heat Island. User will run this page to get acess to th
 
 import time
 
-from heat_island.getcoor.getcoor import select_coordinate
+from heat_island.getcoor import select_coordinate
 from heat_island.data_process import input_file_from_data_dir
 from heat_island.geo_process import create_hexagon
 

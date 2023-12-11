@@ -2,7 +2,7 @@
 """
 import unittest
 
-from heat_island.getcoor import getcoor
+from heat_island import getcoor
 
 
 class TestGetcoor(unittest.TestCase):
