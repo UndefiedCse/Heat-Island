@@ -1,5 +1,15 @@
-"""This module is used to get coordinate from user input and
-check whether the input is inside the boundary
+"""
+This module is used to get coordinate input from user and
+    check whether the input is inside the city boundary
+
+Functions:
+    make_collection(features: list): Makes GeometryCollection
+        containing city boundary.
+    open_browser(json_path: str, output_dir: str = ''): Opens brower
+        outlining city boundary for user to select point; point
+        copied to clipboard.
+    select_coordinate(path: str, temp_dir: str = '', save_html: bool = False):
+        Main function for selecting coordinates within the city boundary
 """
 import json
 import os
@@ -50,7 +60,8 @@ def make_collection(features: list):
 
 
 def open_browser(json_path: str, output_dir: str = ''):
-    """Open browser for user to select point
+    """
+    Open browser for user to select point
         and copy its coordinate to clipboard
 
     Args:
@@ -109,7 +120,8 @@ def open_browser(json_path: str, output_dir: str = ''):
 
 
 def select_coordinate(path: str, temp_dir: str = '', save_html: bool = False):
-    """Main function for selecting coordinate
+    """
+    Main function for selecting coordinate
 
     Args:
         path (str): path to city boundary
