@@ -1,8 +1,8 @@
 Case 1: Architect
 * Select building location
 * Select season/date of interest or average yearly temperature
-* View current annual temperature/air quality
-* View changing temperature/air quality dependent on building height
+* View current annual temperature
+* View changing temperature dependent on building height
 
 Case 2: Advisor
 * Select building location, building expected height
