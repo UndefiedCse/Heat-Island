@@ -1,8 +1,8 @@
 Case 1: Architect
 * Select building location
 * Select season/date of interest or average yearly temperature
-* View current temperature/air quality
-* View changing temperature/air quality
+* View current annual temperature/air quality
+* View changing temperature/air quality dependent on building height
 
 Case 2: Advisor
 * Select building location, building expected height
@@ -10,5 +10,5 @@ Case 2: Advisor
 * View graph/raw data between building heights and local temperatures
 
 Case 3: New move
-
-Implied:
+* Select multiple building locations
+* Identify the average annual local temperatures in each location (simultaneously displayed for comparison)
