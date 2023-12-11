@@ -4,10 +4,12 @@ and optimize the best k hyperparameter
 import os.path
 import joblib
 import geopandas as gpd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
-# from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
 # from heat_island.data_process import input_file_from_data_dir
 
 
@@ -29,9 +31,62 @@ def get_keys():
     return features
 
 
-def main(data_path: str, features: list = None,
-         target: str = 'Ave temp annual_F',
-         save_path: str = '', fname: str = 'model.bin'):
+def find_best_estimator(x_train, y_train, scaler):
+    """Find the best hyperparameter for KNN, LR, RFR
+
+    Args:
+        x_train (df): training data input
+        y_train (df): true value of training dataset
+        scaler (scaler): standard scaler for transforming
+
+    Returns:
+        dict: best KNN, LR, RFR model
+    """
+    models = {
+        'KNN': KNeighborsRegressor(weights='distance'),
+        'LinearRegression': LinearRegression(),
+        'RandomForestRegressor': RandomForestRegressor()
+    }
+    param_grid = {
+        'KNN': {'n_neighbors': [3, 5, 7, 9],
+                'weights': ['uniform', 'distance']},
+        'LinearRegression': {},
+        'RandomForestRegressor': {
+            'n_estimators': [100, 150, 200],
+            'max_depth': [2, 5, 10, 20]
+        }
+    }
+    best_estimators = {}
+    for model_name, model_inst in models.items():
+        grid_search = GridSearchCV(model_inst, param_grid[model_name],
+                                   cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(scaler.transform(x_train), y_train)
+        best_estimators[model_name] = grid_search.best_estimator_
+    return best_estimators
+
+
+def get_scores(x_test, y_test, best_estimators, scaler):
+    """Calculate RMSE for each model to check generalization error
+
+    Args:
+        x_test (df): testing data feature
+        y_test (df): true value of testing data
+        best_estimators (dict): dict of optimized model (KNN, LR, RFR)
+        scaler (standard scaler): scaler for transformation
+
+    Returns:
+        dict: RMSE of each model type
+    """
+    model_scores = {}
+    for model_name, model in best_estimators.items():
+        y_pred = model.predict(scaler.transform(x_test))
+        model_scores[model_name] = mean_squared_error(y_test, y_pred)**0.5
+    return model_scores
+
+
+def train(data_path: str, features: list = None,
+          target: str = 'Ave temp annual_F',
+          save_path: str = '', fname: str = 'model.bin'):
     """Main function for training model
 
     Args:
@@ -43,6 +98,8 @@ def main(data_path: str, features: list = None,
         save_path (str, optional): save directory. Defaults to ''.
         fname (str, optional): name of the save file. Defaults to 'model.bin'.
     """
+    if fname[-4:] != '.bin':
+        raise ValueError("Save file must be `.bin` format")
     if features is None:
         features = get_keys()
     x, y = clean_data(data_path, features, target)
@@ -50,16 +107,15 @@ def main(data_path: str, features: list = None,
                                                         random_state=0)
     scale = StandardScaler()
     scale.fit(x_train)
-    # Change here if performance is bad
-    model = KNeighborsRegressor()
-    # model = LinearRegression()
-    model.fit(scale.transform(x_train), y_train)
-    print("Training successful")
-    train_score = model.score(x_train, y_train)
-    print(f"Your train score is {train_score}")
-    test_score = model.score(x_test, y_test)
-    print(f'Your test score is {test_score}')
-    save_model(model, scale, save_path, fname)
+
+    best_estimators = find_best_estimator(x_train, y_train, scale)
+    model_scores = get_scores(x_test, y_test, best_estimators, scale)
+
+    print(f"Model Scores: {model_scores}")
+    model_path = save_model(best_estimators[min(model_scores,
+                                            key=model_scores.get)],
+                            scale, save_path, fname)
+    return model_path
 
 
 def predict(model, scale, raw_x):
@@ -101,9 +157,36 @@ def clean_data(data_path: str, features: list, target: str):
     if not all(col in gdf.columns for col in all_col):
         raise KeyError("Incorrect dataset format")
     gdf = gdf[all_col].dropna()
-    if len(gdf) < 5:
+    if len(gdf) < 9:
         raise ValueError("Dataset too small")
     return gdf[features], gdf[target]
+
+
+def load_model(path: str):
+    """Load model with the same format as save_model
+
+    Args:
+        path (str): path to saved model file
+
+    Raises:
+        ValueError: If there is no file according to `path`
+        ValueError: Save file format must be the same as save_model
+        ValueError: If file structure is not the same as save_model
+
+    Returns:
+        regressor: regressor model
+        scaler: scale for prediction
+    """
+    if not isinstance(path, str):
+        path = str(path)
+    if not os.path.isfile(path):
+        raise ValueError("Input path does not exist")
+    if path[-4:] != '.bin':
+        raise ValueError("Incorrect file type")
+    tmp = joblib.load(path)
+    if 'model' not in tmp.keys() or 'scaler' not in tmp.keys():
+        raise ValueError("Unexpected file structure")
+    return tmp['model'], tmp['scaler']
 
 
 def save_model(model, scaler, direc: str, fname: str):
@@ -145,6 +228,11 @@ def save_model(model, scaler, direc: str, fname: str):
         raise ValueError("Output file exist, change file name")
     output = {'model': model, 'scaler': scaler}
     joblib.dump(output, direc+fname)
+    print(f"Save file at {direc+fname}")
+    return direc+fname
 
-
-main('data/example_aggr_hexagon (2).geojson')
+# For testing purposes
+# if __name__ == '__main__':
+#     model_path = train('data/example_aggr_hexagon (2).geojson')
+#     modeler, scaler = load_model(model_path)
+#     print("complete")
