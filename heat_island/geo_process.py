@@ -1,29 +1,28 @@
-# import pandas as pd
-# import geopandas as gpd
+"""
+This module converts a central coordinate into hexagons for use in ML and also to
+display them as GeoJson for use in Folium.
+
+Functions:
+    create_hexagon(latitude, longitude): Creates a hexagon Polygon surrounding given
+        latitude and longitude.
+    hex_to_geojson(hexagon): Converts a hexagon polygon into GeoJson format for Folium.
+"""
+import math
 import shapely.geometry
 from shapely.geometry import Polygon
-# from geojson import Feature, Point, FeatureCollection
-# import json
-import math
-# import mercantile
-# from tqdm import tqdm
-# from folium import GeoJson
-# import os
-# import tempfile
-# import fiona
 import folium
-# import os
-# import requests
-# import rasterio
-# import rasterstats
-# import matplotlib
-# import matplotlib.pyplot as plt
 
 def create_hexagon(latitude, longitude):
     """
-    
-    """
+    Creates hexagon shaped Polygon centered around latitude and longitude.
 
+    Args:
+        latitude (float): The latitude of the user-selected point
+        longitude (float): The longitude of the user-selected point
+
+    Returns:
+        shapely.geometry.Polygon: Hexagon centered around the input args
+    """
     # Earth's radius in meters
     earth_radius = 6371000
 
@@ -54,6 +53,15 @@ def create_hexagon(latitude, longitude):
     return Polygon(hexagon_vertices)
 
 def hex_to_geojson(hexagon):
+    """
+    Converts hexagon Polygon into GeoJson for Folium
+
+    Args:
+        hexagon (shapely.geometry.Polygon): The hexagon polygon
+
+    Returns:
+        folium.GeoJson: Hexagon shape in GeoJson for use in Folium
+    """  
     return folium.GeoJson({
         "type": "Feature",
         "geometry": shapely.geometry.mapping(hexagon)
