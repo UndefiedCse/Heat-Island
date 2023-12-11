@@ -10,7 +10,7 @@
     * Inputs: (str) path to the file with the city boundary (in data folder), [opt, str] path of the directory for saving the boundary-overlayed map, [opt, bool] decide whether to save the overlayed map
     * Returns: (float) latitude, (float) longitude
 
-# Use case 2: Mapping average building height based on a latitude/longitude
+# Use case 2: Find average building height based on a latitude/longitude
 * Selecting smaller hexagonal region surrounding a point
     * Name: create_hexagon
     * What it does: Creates a hexagon to determine the area which to include the heights
