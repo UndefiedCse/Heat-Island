@@ -1,6 +1,9 @@
-'''
-Starting python page for Heat Island. User will run this page to get acess to the maps, etc.
-'''
+"""
+Heat Island Start Page
+
+This module is the starting python page for Heat Island. Users can run this page to
+access maps and the related local temperatures to analyze local heat fluctuations.
+"""
 
 import time
 
@@ -75,15 +78,11 @@ while MOREPOINTS:
     # and a text here directly.
     # Chart visualization look here: https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
     # Look at the Vega/Vega Lite Charts
-    more = input("Would you like to test more points? (y/n)")
-    for i in range(3):
-        if more.lower() == "n":
+    more = ''
+    while more not in ('y', 'n'):
+        more = input("Would you like to test more points? (y/n)")
+        if more.lower() == 'y':
+            break
+        if more.lower() == 'n':
             MOREPOINTS = False
             break
-        if more.lower() == "y":
-            break
-        else:
-            if i == 2:
-                print("We will stop running after another typo.")
-            more = input("That's not a valid response. Please try again.")
-        
