@@ -2,7 +2,7 @@
 # Urban Heat Island Effect
 The urban heat island effect is a phenomenon where urban areas, where structures such as buildings and roads are highly concentrated, experience significantly higher temperatures than surrounding rural areas. The Urban Heat Island Effect Project, leveraging machine learning algorithms, aims to accurately predict temperature variations within urban environments based on location and physical characteristics of the area, with a particular focus on building height and terrain. 
 
-![alt text](https://github.com/LilacHo/Heat-Island/blob/main/doc/urban_heat_island_profile.jpg)
+![alt text](doc/urban_heat_island_profile.jpg)
 
 (picture credit: [Urbanland](https://urbanland.uli.org/public/four-approaches-to-reducing-the-urban-heat-island-effect/))
 
@@ -45,6 +45,15 @@ City of Seattle (city boundary is acquired from [Seattle GeoData](https://data-s
 Data processing was carried out using the scripts `data_process.py`, `height_acquire.py`, and `geo_process.py`. These scripts are designed to preprocess `.csv` and `.geojson` files, ensuring that they meet our specific requirements.
 
 ### Model training and testing
+
+Before training the model, we needed to preprocess the data by dropping all data with `NaN` value. Then we standardized all features using `StandardScaler` function in `sklearn`.
+
+In the model training, we choose the best regression model between `Linear Regression`, `Random Forest Regression`, and `K-Nearest Neighbor`
+
+For each regression model, hyperparameters were optimized using 5-fold cross validation. To evaluate the best regression model after getting the best hyperparameter for each model, we used Root Mean Square Error (RMSE) and chose the model with the lowest RMSE.
+
+After getting the best regression model, we saved the model and scale in `.bin` format and we provided loading function (`load_model`) to load the model after save.
+
 
 ### User interaction / visualization
 
