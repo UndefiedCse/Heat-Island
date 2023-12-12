@@ -1,166 +1,145 @@
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 import shapely.geometry
-from shapely.geometry import Polygon
-from geojson import Feature, Point, FeatureCollection
-import json
-import math
-import numpy as np
 import mercantile
 from tqdm import tqdm
-from folium import GeoJson
 import os
 import tempfile
 import fiona
-import folium
 
-import sys
-import requests
-import rasterio
-from rasterio.warp import calculate_default_transform, reproject
-from rasterio.enums import Resampling
-import rasterstats
-import matplotlib
-import matplotlib.pyplot as plt
-from rasterio.features import geometry_mask
-
-# get the path of current
-sys.path.append(os.path.dirname(os.getcwd()))
-
-from heat_island import data_process
-from heat_island import geo_process
-
-# set the dir and path of downloaded data
-# or, after Lilac updating the import_file_from_data_dir.py,
-# call import_file_from_data_dir function to create path for existing and output files
-# existing
-raw_building_path = data_process.input_file_from_data_dir('building')
-raw_extent_path = data_process.input_file_from_data_dir('extent')
-raw_weather_path = data_process.input_file_from_data_dir('weather')
-raw_terrain_path = data_process.input_file_from_data_dir('terrain')
-raw_boundary_path = data_process.input_file_from_data_dir('boundary')
-
-# output
-aggr_hex_path = data_process..model('hex')
-
-'''read existing files'''
-# building, extent, weather, boundary, terrain (set crs to 4326)
-raw_building = gpd.read_file(raw_building_path)
-raw_extent = gpd.read_file(raw_extent_path)
-raw_weather = pd.read_csv(raw_weather_path)
-raw_boundary = gpd.read_file(raw_boundary_path)
-
-'''align crs for existing files'''
+from data_process import input_file_from_data_dir
+from geo_process import create_hexagon
 
 
-# align crs for all data(except weather which is still a dataframe), here we set all to 4326
-# set_crs will set the terrain tif crs to target_crs
-# target_crs sample: 'EPSG:4326'
-def set_crs(input_file_path, output_file_path, target_crs):
-    with rasterio.open(input_file_path) as src:
-        # Define the new CRS
-        dst_crs = target_crs
-
-        # Calculate the transform and dimensions for the new CRS
-        transform, width, height = calculate_default_transform(
-            src.crs, dst_crs, src.width, src.height, *src.bounds)
-
-        # Create a metadata dictionary for the output file
-        kwargs = src.meta.copy()
-        kwargs.update({
-            'crs': dst_crs,
-            'transform': transform,
-            'width': width,
-            'height': height
-        })
-
-        # Open the output file
-        with rasterio.open(output_file_path, 'w', **kwargs) as dst:
-            for i in range(1, src.count + 1):
-                # Reproject and write each band
-                reproject(
-                    source=rasterio.band(src, i),
-                    destination=rasterio.band(dst, i),
-                    src_transform=src.transform,
-                    src_crs=src.crs,
-                    dst_transform=transform,
-                    dst_crs=dst_crs,
-                    resampling=Resampling.nearest)
 
 
-set_crs(raw_terrain_path, raw_terrain_path, 'EPSG:4326')
-# terrain: from a tif file to a numpy.ndarray
-with rasterio.open(raw_terrain_path) as src:
-    raw_terrain = src.read()
-print(src.meta)
-print(type(raw_terrain))
-print(raw_terrain.shape)
+def height_acquire(hexagon):
+    """
+    Acquires building height data from a specified hexagonal area.
 
-print(raw_building.crs)
-print(raw_extent.crs)
-print(raw_boundary.crs)
+    This function takes a hexagon polygon as input, checks its validity,
+    and expands its bounds slightly. It then generates a set of quad 
+    keys for tiles within these bounds at a specific zoom level. For 
+    each quad key, the function queries a dataset, reads the correspond
+    -ing GeoJSON data, and creates a GeoDataFrame that includes building
+    heights. It finally concatenates all GeoDataFrames for each quad key
+    into one combined GeoDataFrame, which it returns.
 
-'''create hexagon for weather data which has lat and lon
-user will have to specify radius
-'''
+    Parameters:
+        hexagon (shapely.geometry.polygon.Polygon): 
+        A hexagon polygon representing the area of interest (AOI).
 
+    Returns:
+        gpd.GeoDataFrame: A GeoDataFrame containing the heights of 
+        buildings within the specified hexagon area.
 
-# two function: create_hexagon, hex_to_geojson
-# create_hexagon: function for creating hexagon
-def create_hexagon(lat, lon, radius):
-    # number of sides
-    n_sides = 6
-    # Convert latitude and longitude to radians
-    lat_rad = math.radians(lat)
-    lon_rad = math.radians(lon)
-    # Earth's radius in meters
-    earth_radius = 6371000
+    Raises:
+        ValueError: If the input is not a valid shapely polygon or if 
+        there are issues with data retrieval based on quad keys.
 
-    # Calculate the radius of our hexagon in radians
-    r_rad = radius / earth_radius
+    Example:
+    >>> aoi_hexagon = create_hexagon(-122.34543, 47.65792)
+    >>> buildings_heights_gdf = height_acquire(aoi_hexagon)
 
-    # Calculate the vertices of the hexagon
-    hexagon_vertices = []
-    for i in range(n_sides):
-        angle = math.pi / 3 * i
-        x = lon_rad + r_rad * math.cos(angle)
-        y = lat_rad + r_rad * math.sin(angle)
-        # Convert the vertex back to degrees
-        vertex = (math.degrees(x), math.degrees(y))
-        hexagon_vertices.append(vertex)
+    Note:
+    - This function is designed for use with hexagonal polygons specifically.
+    - The hexagon should be a valid shapely polygon.
+    """
 
-    return Polygon(hexagon_vertices)
+    if type(hexagon) != shapely.geometry.polygon.Polygon:
+        raise ValueError("polygon is invalid")
 
+    # Get the bounds of the area of interest (AOI)
+    minx, miny, maxx, maxy = hexagon.bounds
+    # Slightly increase the area of interest to ensure coverage
+    minx = minx - 0.001 # minimum longitude
+    miny = miny - 0.001 # minimum latitude
+    maxx = maxx + 0.001 # maximum longitude
+    maxy = maxy + 0.001 # maximum latitude
 
-def hex_to_geojson(hexagon):
-    return GeoJson({
-        "type": "Feature",
-        "geometry": shapely.geometry.mapping(hexagon)
-    })
-
-
-# call the create_hexagon for each row of raw_weather, the returned hexagon geometry stored in a new column
-# slice desired columns to a new dataframe raw_hex
-rex_radius = 160
-raw_weather['hex'] = raw_weather.apply(lambda row: create_hexagon(row['Lat'], row['Lon'], rex_radius), axis=1)
-
-raw_hex = raw_weather.copy()[['hex', 'Station ID', 'Lat', 'Lon', 'Elev (ft.)', 'Ave temp annual_F', 'Note']]
-raw_hex.head()
+    # Initialize an empty set to store quad keys
+    quad_keys = set()
+    # Generate quad keys for tiles within the bounds at zoom level 9
+    for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
+        quad_keys.add(int(mercantile.quadkey(tile)))
+    # Convert the set of quad keys to a list
+    quad_keys = list(quad_keys)
+    print(f"The input area spans {len(quad_keys)} tiles: {quad_keys}")
 
 
-# function: get_centroid
-# get_centroid: take geometry of building footprint and compute the centroid coordinate
-def get_centroid(df):
-    df['centroid'] = df.geometry.centroid
+    # Read the dataset links CSV file
+    df = pd.read_csv(
+        "https://minedbuildings.blob.core.windows.net/global-buildings/dataset-links.csv"
+    )
+
+    # Create an empty GeoDataFrame
+    combined_gdf = gpd.GeoDataFrame()
+    # Debug print statement - can be removed in production
+    # print(combined_gdf)
+
+    # Iterate over each quad key
+    for quad_key in tqdm(quad_keys):
+        # Find rows in the dataset that match the current quad key
+        rows = df[df["QuadKey"] == quad_key]
+
+        # If exactly one row is found for the quad key
+        if rows.shape[0] == 1:
+            # Get the URL of the GeoJSON file
+            url = rows.iloc[0]["Url"]
+            # Read the GeoJSON file from the URL
+            df2 = pd.read_json(url, lines=True)
+            # Convert geometry data to Shapely shapes
+            df2["geometry"] = df2["geometry"].apply(shapely.geometry.shape)
+
+            # Create a GeoDataFrame from the data
+            gdf = gpd.GeoDataFrame(df2, crs=4326)
+            gdf['height'] = gdf['properties'].apply(lambda x: x.get('height'))
+            gdf = gdf.drop(columns=['properties'])
+
+            combined_gdf = pd.concat([combined_gdf, gdf], ignore_index=True)
+            # Debug print statement - can be removed in production
+            # print(combined_gdf)
+
+        # If multiple rows are found for a quad key, raise an error
+        elif rows.shape[0] > 1:
+            raise ValueError(f"Multiple rows found for QuadKey: {quad_key}")
+        # If no rows are found for a quad key, raise an error
+        else:
+            raise ValueError(f"QuadKey not found in dataset: {quad_key}")
+        
+    return combined_gdf
 
 
-# function: basic weighted statics calculation
+def get_centroid(gdf):
+    """
+    Calculate and add the centroid of geometries in a GeoDataFrame.
+
+    This function computes the centroid for each geometry in the 
+    GeoDataFrame and adds these centroids as a new column to the 
+    GeoDataFrame. The centroid of a shape is the geometric center of 
+    all points in the shape.
+
+    Parameters:
+    gdf (GeoDataFrame): A GeoDataFrame containing geometries from which
+    the centroids are to be calculated.
+
+    Returns:
+    GeoDataFrame: The original GeoDataFrame with an additional column 
+    'centroid', containing the centroid of each geometry.
+    """
+
+    gdf['centroid'] = gdf.geometry.centroid
+    # Debug print statement - can be removed in production
+    # print(gdf)
+    return gdf
+
+
 def weighted_median(data, weights):
     data_sorted, weights_sorted = zip(*sorted(zip(data, weights)))
     cum_weights = np.cumsum(weights_sorted)
     cutoff = weights.sum() / 2.0
     return np.interp(cutoff, cum_weights, data_sorted)
-
 
 def weighted_percentile(data, weights, percentile):
     data_sorted, weights_sorted = zip(*sorted(zip(data, weights)))
@@ -168,17 +147,18 @@ def weighted_percentile(data, weights, percentile):
     cutoff = weights.sum() * percentile / 100.0
     return np.interp(cutoff, cum_weights, data_sorted)
 
-
 def weighted_std(data, weights):
     average = np.average(data, weights=weights)
-    variance = np.average((data - average) ** 2, weights=weights)
+    variance = np.average((data - average)**2, weights=weights)
     return np.sqrt(variance)
 
 
-# function: compute weighted statics of buildings whose centroid is within the hexagon
 def average_building_height_with_centroid(buildings, hexagon):
     # Select buildings whose centroid is within or intersects the hexagon
-    buildings_within_hex = buildings[buildings['centroid'].within(hexagon.hex)]
+    buildings_within_hex = buildings[buildings['centroid'].within(hexagon)]
+    # Debug print statement - can be removed in production
+    # print(buildings_within_hex)
+
     # print(buildings_within_hex.columns)
     if buildings_within_hex.empty:
         # return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
@@ -196,11 +176,13 @@ def average_building_height_with_centroid(buildings, hexagon):
         }
     # Calculate the product of the area and height for each building
     buildings_within_hex['area_height'] = buildings_within_hex.area * buildings_within_hex['height']
+    print(buildings_within_hex)
+
 
     # Method 1: related to hexagon area
     # Sum the products and divide by the area of the hexagon to get the average height
     total_height_area = buildings_within_hex['area_height'].sum()
-    hexagon_area = hexagon.hex.area
+    hexagon_area = hexagon.area
     print(hexagon_area)
     average_height_area = total_height_area / hexagon_area if hexagon_area != 0 else 0
 
@@ -229,67 +211,218 @@ def average_building_height_with_centroid(buildings, hexagon):
     }
 
 
-'''execute the weighted statics computation
-user will specify what static neeeded
-provided statics: ['total_height_area','avg_height_area','mean','median', 'std_dev', 'min', '25%','50%' ,'75%', 'max']
-'''
-raw_hex['centroid_stat_ALL'] = raw_hex.apply(lambda x: average_building_height_with_centroid(raw_building, x), axis=1)
-for stat in ['total_height_area', 'avg_height_area', 'mean', 'median', 'std_dev', 'min', '25%', '50%', '75%', 'max']:
-    # try:
-    #     raw_hex = raw_hex.drop(['centroid_stat_' + stat],axis = 1)
-    # except KeyError:
-    #     pass
-    raw_hex['centroid_stat_' + stat] = raw_hex['centroid_stat_ALL'].apply(lambda x: x['centroid_stat_' + stat])
+
+# aoi_hexagon = create_hexagon(-122.34543, 47.65792)
+# height_acquire(aoi_hexagon)
+
+# # Read in the GeoJSON file for Seattle city limits
+# seattle = gpd.read_file(input_file_from_data_dir("seattle-city-limits.geojson"))
+# # Extract the first geometry object from the GeoDataFrame
+# aoi_geom = seattle.geometry[0]
+# # Change the type to shapely.geometry.polygon.Polygon
+# aoi_shape = shapely.geometry.shape(aoi_geom)
+
+# df1 = height_acquire(aoi_shape)
+# get_centroid(df1)
 
 
-# function: compute statics of terrain within the hexagon
-def terrain_stats(terrain, hexagon):
-    # Make sure 'terrain' is a Rasterio dataset and 'hexagon' is the geometry
-    geom_mask = geometry_mask([hexagon], transform=terrain.transform, invert=True,
-                              out_shape=(terrain.height, terrain.width))
+# aoi_hexagon = create_hexagon(-122.34543, 47.65792)
+# building = gpd.read_file(input_file_from_data_dir("seattle_building_footprints.geojson"))
+# new_building = get_centroid(building)
 
-    # Use the mask to select the terrain data
-    selected_terrain = terrain.read(1)[geom_mask]
+# print(average_building_height_with_centroid(new_building, aoi_hexagon))
 
-    # Calculate the statistics for the selected terrain data
-    if selected_terrain.size > 0:
-        mean = np.mean(selected_terrain)
-        median = np.median(selected_terrain)
-        std_dev = np.std(selected_terrain)
-        min_val = np.min(selected_terrain)
-        percentile_25 = np.percentile(selected_terrain, 25)
-        percentile_50 = np.percentile(selected_terrain, 50)
-        percentile_75 = np.percentile(selected_terrain, 75)
-        max_val = np.max(selected_terrain)
-    else:
-        mean = median = std_dev = min_val = percentile_25 = percentile_50 = percentile_75 = max_val = np.nan
 
-    return {
-        'terrain_stat_mean': mean,
-        'terrain_stat_median': median,
-        'terrain_stat_std_dev': std_dev,
-        'terrain_stat_min': min_val,
-        'terrain_stat_25%': percentile_25,
-        'terrain_stat_50%': percentile_50,
-        'terrain_stat_75%': percentile_75,
-        'terrain_stat_max': max_val
+def seattle_height_acquire():
+    """
+    Acquires building height information for Seattle city limits and 
+    stores it in a GeoJSON file.
+
+    This function reads the Seattle city limits from a provided GeoJSON
+    file and expands its area slightly to ensure complete coverage. It 
+    then generates quad keys for tiles within this area at a specified 
+    zoom level, using these keys to retrieve building footprint data 
+    from an online dataset. The function filters and processes the data,
+    extracting height information and storing it in a GeoJSON file for 
+    further use.
+
+    Steps:
+    1. Read Seattle city limits from a GeoJSON file.
+    2. Generate quad keys for tiles within the area bounds.
+    3. Fetch building data for each quad key from an online dataset.
+    4. Extract and process height information from the building data.
+    5. Store the processed data in a GeoJSON file.
+
+    Raises:
+        ValueError: If multiple or no rows are found for a quad key in 
+        the dataset.
+
+    Output:
+        A GeoJSON file containing polygons representing building 
+        footprints with associated height data.
+    """
+
+    # # Example polygon
+    # aoi_geom = {
+    # "coordinates": [
+    #     [
+    #         [-122.34522236751503, 47.793350002297956],
+    #         [-122.3452190137285, 47.79345987328376],
+    #         [-122.34535989993172, 47.79346182082953],
+    #         [-122.34536326515978, 47.793351950006006],
+    #         [-122.34522236751503, 47.793350002297956],
+    #     ]
+    # ],
+    # "type": "Polygon",
+    # }
+
+    # Read in the GeoJSON file for Seattle city limits
+    seattle = gpd.read_file(input_file_from_data_dir("seattle-city-limits.geojson"))
+    # Extract the first geometry object from the GeoDataFrame
+    aoi_geom = seattle.geometry[0]
+    # Change the type to shapely.geometry.polygon.Polygon
+    aoi_shape = shapely.geometry.shape(aoi_geom)
+    # Get the bounds of the area of interest (AOI)
+    minx, miny, maxx, maxy = aoi_shape.bounds
+    # For Seattle city limit:
+    # minx = -122.40985799299995
+    # miny = 47.64445376000003
+    # maxx = -122.24563167199994
+    # maxy = 47.73416571200005
+    # Slightly increase the area of interest to ensure coverage
+    minx = minx - 0.001 # minimum longitude
+    miny = miny - 0.001 # minimum latitude
+    maxx = maxx + 0.001 # maximum longitude
+    maxy = maxy + 0.001 # maximum latitude
+
+    # Define the output file name for the building footprints
+    output_fn = os.path.join("data","example_building_footprints.geojson")
+
+
+    # Initialize an empty set to store quad keys
+    quad_keys = set()
+    # Generate quad keys for tiles within the bounds at zoom level 9
+    for tile in list(mercantile.tiles(minx, miny, maxx, maxy, zooms=9)):
+        quad_keys.add(int(mercantile.quadkey(tile)))
+    # Convert the set of quad keys to a list
+    quad_keys = list(quad_keys)
+    print(f"The input area spans {len(quad_keys)} tiles: {quad_keys}")
+
+
+    # Read the dataset links CSV file
+    df = pd.read_csv(
+        "https://minedbuildings.blob.core.windows.net/global-buildings/dataset-links.csv"
+    )
+
+
+    # Initialize index and a list to combine rows from different files
+    idx = 0
+    combined_rows = []
+
+    # Create a temporary directory to store downloaded files
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # List to store temporary file names
+        tmp_fns = []
+        # Iterate over each quad key
+        for quad_key in tqdm(quad_keys):
+            # Find rows in the dataset that match the current quad key
+            rows = df[df["QuadKey"] == quad_key]
+            # Debug print statement - can be removed in production
+            # print(rows)
+
+            # If exactly one row is found for the quad key
+            if rows.shape[0] == 1:
+                # Get the URL of the GeoJSON file
+                url = rows.iloc[0]["Url"]
+                # Read the GeoJSON file from the URL
+                df2 = pd.read_json(url, lines=True)
+                # Convert geometry data to Shapely shapes
+                df2["geometry"] = df2["geometry"].apply(shapely.geometry.shape)
+                # Debug print statement - can be removed in production
+                # print(df2)
+
+                # Create a GeoDataFrame from the data
+                gdf = gpd.GeoDataFrame(df2, crs=4326)
+                gdf['height'] = gdf['properties'].apply(lambda x: x.get('height'))
+                gdf = gdf.drop(columns=['properties'])
+                # Debug print statement - can be removed in production
+                # print(gdf)
+
+                # Define the file name for the temporary file
+                fn = os.path.join(tmpdir, f"{quad_key}.geojson")
+                tmp_fns.append(fn)
+
+                # Write the GeoDataFrame to a GeoJSON file if it doesn't exist
+                if not os.path.exists(fn):
+                    gdf.to_file(fn, driver="GeoJSON")
+            # If multiple rows are found for a quad key, raise an error
+            elif rows.shape[0] > 1:
+                raise ValueError(f"Multiple rows found for QuadKey: {quad_key}")
+            # If no rows are found for a quad key, raise an error
+            else:
+                raise ValueError(f"QuadKey not found in dataset: {quad_key}")
+            
+
+        # Merge each temporary GeoJSON files into a single file
+        for fn in tmp_fns:
+            with fiona.open(fn, "r") as f:
+                # Read each row in the file
+                for row in tqdm(f):
+                    row = dict(row)
+                    shape = shapely.geometry.shape(row["geometry"])
+
+                    # Check if the shape is within the area of interest
+                    if aoi_shape.contains(shape):
+                        properties = row["properties"]
+                        # Remove the 'id' key if it exists
+                        if "id" in row:
+                            del row["id"]
+                        
+                        # Extract the height value from properties, assuming it's already a direct value and not a dict
+                        height = properties.get('height')  # This assumes that 'height' is directly stored in properties
+
+                        # Create a new properties dictionary with only 'id' and 'height'
+                        new_properties = {"id": idx, "height": height}
+                        idx += 1
+
+                        # Update the row with the new properties
+                        row["properties"] = new_properties
+
+                        # Add the row to the combined rows list
+                        combined_rows.append(row)
+
+
+    # Define the schema for the output file
+    schema = {
+        "geometry": "Polygon",
+        "properties": {
+            "id": "int",
+            "height": "float"
+        }
     }
 
+    # Write the combined rows to the output file with updated schema
+    with fiona.open(output_fn, "w", driver="GeoJSON", crs="EPSG:4326", schema=schema) as f:
+        for row in combined_rows:
+            # Make sure each row's attributes conform to the schema, including 'height'
+            properties = row['properties']
+            new_properties = {
+                'id': properties['id'],
+                # Get the 'height' value directly from the original properties dictionary
+                'height': properties.get('height') 
+            }
 
-'''execute the statics computation
-user will specify what static needed
-provided statics: ['mean', 'median', 'std_dev', 'min', '25%','50%', '75%', 'max']
-'''
-with rasterio.open(raw_terrain_path) as terrain_dataset:
-    for stat in ['mean', 'median', 'std_dev', 'min', '25%', '50%', '75%', 'max']:
-        raw_hex['terrain_stat_' + stat] = raw_hex.apply(
-            lambda x: terrain_stats(terrain_dataset, x['hex'])[f'terrain_stat_{stat}'], axis=1)
+            # Check if 'height' value is missing）
+            if new_properties['height'] is None or new_properties['height'] == -1:
+                # Skip that polygon without height
+                continue 
 
-# optional, convert the weather station elevation to meter
-raw_hex['Elev (m.)'] = raw_hex['Elev (ft.)'].replace('-', np.nan).astype(float) * 0.3048
+            # Construct a new row dictionary to match the schema
+            new_row = {
+                'type': 'Feature',
+                'geometry': shapely.geometry.mapping(shapely.geometry.shape(row['geometry'])),
+                'properties': new_properties
+            }
 
-# optional, select columns user would like to keep
-
-raw_hex = gpd.GeoDataFrame(raw_hex, geometry='hex')
-
-raw_hex.to_file(aggr_hex_path, driver="GeoJSON")
+            # Write the new rows to the output file
+            f.write(new_row)
