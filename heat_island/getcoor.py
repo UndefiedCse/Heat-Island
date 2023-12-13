@@ -1,5 +1,6 @@
 """This module is used to get coordinate from user input and
 check whether the input is inside the boundary
+`make_collection` is used to create 
 """
 import json
 import os
@@ -11,7 +12,8 @@ import pyperclip
 
 def make_collection(features: list):
     """
-    Make GeometryCollection for locating boundary
+    Make GeometryCollection for locating boundary.
+    Example: make_collection(js['features'])
 
     Args:
         features (list): list of features
@@ -134,15 +136,16 @@ def select_coordinate(path: str, temp_dir: str = '', save_html: bool = False):
         respond = ''
         print(f'Attempt {i}')
         raw_output = pyperclip.waitForNewPaste()
-        y = float(raw_output[raw_output.find(','):raw_output.rfind(']')])
+        y = float(raw_output[raw_output.find(',')+1:raw_output.rfind(']')])
         x = float(raw_output[1:raw_output.find(',')])
         while respond not in ('y', 'n'):
-            respond = input(f"""Here is coordinate ({x},{y})
+            respond = input(f"""Here is coordinate ({y},{x})
                             \n Enter [y] if satisfied.
                             \n Enter [n] to retry\n""")
             if respond.lower() == 'y':
                 break
             if respond.lower() == 'n':
+                webbrowser.open_new_tab(html_path)
                 break
         if respond.lower() == 'y':
             break

@@ -201,7 +201,7 @@ def average_building_height_with_centroid(buildings, hexagon):
         'centroid_stat_total_height_area': total_height_area,
         'centroid_stat_avg_height_area': average_height_area,
         'centroid_stat_mean': weighted_avg,
-        'centroid_stat_median': median,
+        # 'centroid_stat_median': median,
         'centroid_stat_std_dev': std_dev,
         'centroid_stat_min': percentile_0,
         'centroid_stat_25%': percentile_25,
