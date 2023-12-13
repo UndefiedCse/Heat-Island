@@ -8,8 +8,8 @@ import os
 import tempfile
 import fiona
 
-from data_process import input_file_from_data_dir
-from geo_process import create_hexagon
+from heat_island.data_process import input_file_from_data_dir
+from heat_island.geo_process import create_hexagon
 
 
 

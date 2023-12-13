@@ -18,7 +18,7 @@ import folium
 # import matplotlib
 # import matplotlib.pyplot as plt
 
-from data_process import input_file_from_data_dir
+from heat_island.data_process import input_file_from_data_dir
 
 def create_hexagon(longitude, latitude, radius_meters = 111111 * 0.001):
     """
