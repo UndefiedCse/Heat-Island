@@ -40,10 +40,10 @@ while not EXISTING:
         print('''Move your weather data into the 'data' directory, using the following
         format: 'city_weather'. e.g. 'seattle_weather'.''')
         filler = input("Press any key to continue")
-        print('''Move your city boundary into the 'data' directory, using the following 
+        print('''Move your city boundary into the 'data' directory, using the following
         format: 'city_boundary'. e.g. 'seattle_boundary'.''')
         filler = input("Press any key to continue")
-        print('''Move your building data into the 'data' directory, using the following 
+        print('''Move your building data into the 'data' directory, using the following
         format: 'city_building'. e.g. 'seattle_building'.''')
         filler = input("Press any key to continue")
 
@@ -68,14 +68,14 @@ while MOREPOINTS:
     # Returns latitude/longitude coordinates.
     print("Please select the coordinate where you want to run the weather model.")
     x, y = select_coordinate(boundaryFileDir)
-    hex = create_hexagon(x, y, radius)
+    region = create_hexagon(x, y, radius)
 
     # Call hex -> height here
     if city == 'seattle':
         building = gpd.read_file(input_file_from_data_dir("seattle_building_footprints.geojson"))
-    building = height_acquire(hex)
+    building = height_acquire(region)
     new_building = get_centroid(building)
-    building_stats = average_building_height_with_centroid(new_building, hex)
+    building_stats = average_building_height_with_centroid(new_building, region)
 
     # Cleans data
     data = clean_data(building_stats)
@@ -100,7 +100,8 @@ while MOREPOINTS:
     # Display data - What will it look like? Will create a folium pop-up regardless; can be a graph
     # or (various heights with various temperature predictions), or just a line of text as popup
     # and a text here directly.
-    # Chart visualization look here: https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
+    # Chart visualization look here: 
+    # https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
     # Look at the Vega/Vega Lite Charts
     display(predictions.to_string())
     
