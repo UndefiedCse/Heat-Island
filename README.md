@@ -22,21 +22,20 @@ City of Seattle (city boundary is acquired from [Seattle GeoData](https://data-s
 - Python version 3.10 and above
 
 ### Python packages needed:
-- pandas
-- numpy
-- matplotlib
-- rasterio
-- pyproj
-- geopandas
-- geojson
-- ellipsis
-- h3pandas
-- h3-py
-- mercantile
 - folium
-- rasterstats
+- geojson
+- geopandas
+- matplotlib
+- mercantile
+- numpy
+- pandas
 - pyperclip
+- rasterio
+- rasterstats
 - scikit-learn
+- scipy
+- shapely
+- tqdm
 
 
 ## Description
@@ -67,22 +66,52 @@ A map will be displayed using an existing library called Folium. From here, user
 ```
 Heat-Island (master)
 |    .gitignore
-|    License
+|    LICENSE
 |    README.md
+|    environment.yml
+|    heat_island_main.py
+|
+|----- .github/workflows
+|    |    python-flake8.yml
+|    |    python-unittest.yml
 |
 |----- doc
 |    |    user-story.md
 |    |    use_cases.md
 |    |    components.md
+|    |    urban_heat_island_profile.jpg
 |    |    Technology Review CSE583.pptx
 |
 |----- data
-|    |    seattle-city-limits.geojson
-|    |    weather_Seattle.csv
+|    |    seattle_boundary.geojson
+|    |    seattle_weather.csv
+|    |    processed_seattle_weather.csv
+|    |    seattle_building_footprints.geojson
+|    |    example_aggr_hexagon(2).geojson
+|    |    seattle_model.bin
 |
 |----- heat_island (package)
 |    |    __init__.py
-|    |  
+|    |    data_process.py
+|    |    geo_process.py
+|    |    height_acquire.py
+|    |    get_building_and_terrain.py
+|    |    getcoor.py
+|    |    model.py
+|
+|----- tests
+|    |    __init__.py
+|    |    test_geo_process.py
+|    |    test_height_acquire.py
+|    |    test_getcoor.py
+|    |    test_model.py
+|    |----- data
+|    |    |    nan.geojson
+|    |    |    normal.geojson
+|    |    |    small.geojson
+|
+|----- demo
+|    |    data_processing.ipynb
 ```
 
 
