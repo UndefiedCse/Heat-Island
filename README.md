@@ -6,7 +6,7 @@ The urban heat island effect is a phenomenon where urban areas, where structures
 
 (picture credit: [Urbanland](https://urbanland.uli.org/public/four-approaches-to-reducing-the-urban-heat-island-effect/))
 
-The **heat_island** ... (tentative, describe the application of our package)
+The **heat_island** package is designed to estimate the local temperature based on the heights of the surrounding buildings. It is currently designed to work for the city of Seattle, but can be used for other cities with proper data formatting. Upon running, users will have the option to select locations of interest on a map, then receive an expected temperature for each location.
 
 ## Data sources:
 * [Building footprint and height](https://github.com/microsoft/GlobalMLBuildingFootprints)
@@ -57,9 +57,11 @@ After getting the best regression model, we saved the model and scale in `.bin` 
 
 ### User interaction / visualization
 
+A map will be displayed using an existing library called Folium. From here, users will be able to select points of interest on a map. After the system is done computing the expected temperatures, it will display the results in the console. All displays are run directly on 'heat_island_main.py'.
 
 ## Installation
 - Create a virtual environment based on the environment dependency. `conda env create -f environment.yml`
+- Run the main page, 'heat_island_main.py'.
 
 ## Directory Structure
 ```
