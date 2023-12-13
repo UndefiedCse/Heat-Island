@@ -42,6 +42,7 @@ from heat_island.geo_process import create_hexagon
 
 
 
+
 def height_acquire(hexagon):
     """
     Acquires building height data from a specified hexagonal area.

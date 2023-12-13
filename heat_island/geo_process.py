@@ -3,8 +3,8 @@ from shapely.geometry import Polygon
 import math
 import folium
 
-
 from heat_island.data_process import input_file_from_data_dir
+
 
 def create_hexagon(longitude, latitude, radius_meters = 111111 * 0.001):
     """
