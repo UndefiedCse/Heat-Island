@@ -22,7 +22,7 @@
     * Inputs: (shapely.geometry.polygon.Polygon) hexagon
     * Returns: (goppandas.GeoDataFrame) A GeoDataFrame containing the heights of buildings within the specified hexagon area
 * **average_building_height_with_centroid**
-    * Using **shapely polygon** hexagon to find building information 
+    * Using shapely polygon hexagon to find building information 
     * What it does: Finds the average building height within a region of interest
     * Inputs: (shapely polygon/GeoJson polygon) hexagon, (goppandas.GeoDataFrame) building information
     * Returns: Various statistics related to the distribution of building heights

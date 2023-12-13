@@ -91,12 +91,11 @@ while MOREPOINTS:
         NEW = False
         
     # Call the ML model here?
+    print("This will take time. Please wait.")
     modelFileDir = input_file_from_data_dir(city + "_model.bin")
     model, scale = load_model(modelFileDir)
 
     # Call functions for applying ML here
-    print('''Please hold on as the algorithm computes
-    the expected temperature within the region.''')
     building_stats['Lat'] = y
     building_stats['Lon'] = x
     data = pd.DataFrame.from_records([building_stats])
