@@ -1,3 +1,32 @@
+"""
+The 'height_acquire' module provides a comprehensive suite of functions for 
+acquire and processing geographic data, specifically focusing on building 
+heights, based on https://github.com/microsoft/GlobalMLBuildingFootprints. 
+Key functionalities in the module include acquiring building heights within 
+specific areas, calculating geometric centers of shapes, and performing 
+weighted statistical analyses on geographical data. 
+
+
+
+Key Functions:
+- `height_acquire`: Acquires building height data from a specified hexagonal 
+    area and returns a GeoDataFrame with these heights.
+- `get_centroid`: Computes and adds the centroid of geometries in a GeoDataFrame.
+- Statistical helper functions (`weighted_median`, `weighted_percentile`, `weighted_std`): 
+    Provide statistical analysis tools for weighted data.
+- `average_building_height_with_centroid`: Calculates various statistical 
+    measures for building heights within a specified hexagon area.
+
+Example Usage:
+To use this module, first create a hexagonal area of interest using `create_hexagon` 
+function from `heat_island.geo_process`, and then pass this hexagon to `height_acquire` 
+to retrieve building heights within the area.
+
+Author: @LilacHo
+Date: 2023/12/13
+"""
+
+
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -135,24 +164,199 @@ def get_centroid(gdf):
 
 
 def weighted_median(data, weights):
+    """
+    Calculate the weighted median of a dataset.
+
+    This function computes the weighted median for a given set of data 
+    points and their associated weights. It sorts the data and weights, 
+    calculates the cumulative sum of the weights, and then finds the value 
+    at which half of the total weight is accumulated. This value is the 
+    weighted median.
+
+    Parameters:
+    data (array-like): An array, list, or similar structure containing 
+    the data points. The data should be numeric.
+    weights (array-like): An array, list, or similar structure containing 
+    the weights corresponding to each data point. These should be non-negative 
+    numbers and of the same length as the data array.
+
+    Returns:
+    float: The weighted median of the provided data points.
+
+    Raises:
+    ValueError: If `data` and `weights` have different lengths.
+    ValueError: If any weight is negative.
+
+    Example:
+    >>> data = [1, 2, 3, 4, 5]
+    >>> weights = [1, 2, 3, 4, 5]
+    >>> weighted_median(data, weights)
+    4.0
+
+    Note:
+    The weighted median is a measure of central tendency, similar to the 
+    median, but each data point contributes to the final result according 
+    to its associated weight. This is particularly useful in situations 
+    where some data points are more significant than others.
+    """
+    if len(data) != len(weights):
+        raise ValueError("Data and weights must have the same length.")
+    if any(w < 0 for w in weights):
+        raise ValueError("Weights must be non-negative.")
     data_sorted, weights_sorted = zip(*sorted(zip(data, weights)))
     cum_weights = np.cumsum(weights_sorted)
     cutoff = weights.sum() / 2.0
     return np.interp(cutoff, cum_weights, data_sorted)
 
+
 def weighted_percentile(data, weights, percentile):
+    """
+    Calculate the weighted percentile of a dataset.
+
+    This function computes the weighted percentile for a given set of data 
+    points, their associated weights, and the specified percentile. The data 
+    and weights are sorted, and the cumulative weights are calculated. The 
+    function then finds the data point at which the cumulative weight equals 
+    the specified percentile of the total weight.
+
+    Parameters:
+    data (array-like): An array, list, or similar structure containing 
+    the data points. The data should be numeric.
+    weights (array-like): An array, list, or similar structure containing 
+    the weights corresponding to each data point. These should be non-negative 
+    numbers and of the same length as the data array.
+    percentile (float): The desired percentile to calculate. This should be a 
+    number between 0 and 100.
+
+    Returns:
+    float: The weighted percentile value of the provided data points.
+
+    Raises:
+    ValueError: If `data` and `weights` have different lengths.
+    ValueError: If any weight is negative.
+    ValueError: If `percentile` is not between 0 and 100.
+
+    Example:
+    >>> data = [1, 2, 3, 4, 5]
+    >>> weights = [1, 2, 3, 4, 5]
+    >>> weighted_percentile(data, weights, 50)
+    4.0
+
+    Note:
+    The weighted percentile, like the weighted median, accounts for the 
+    significance of each data point through its weight. This is useful in 
+    datasets where certain observations are more important or frequent 
+    than others. The percentile argument allows for flexibility in 
+    determining the specific percentile value needed.
+    """
+
+    if len(data) != len(weights):
+        raise ValueError("Data and weights must have the same length.")
+    if any(w < 0 for w in weights):
+        raise ValueError("Weights must be non-negative.")
+    if not 0 <= percentile <= 100:
+        raise ValueError("Percentile must be between 0 and 100.")
     data_sorted, weights_sorted = zip(*sorted(zip(data, weights)))
     cum_weights = np.cumsum(weights_sorted)
     cutoff = weights.sum() * percentile / 100.0
     return np.interp(cutoff, cum_weights, data_sorted)
 
+
 def weighted_std(data, weights):
+    """
+    Calculate the weighted standard deviation of a dataset.
+
+    This function computes the weighted standard deviation for a given set 
+    of data points and their associated weights. The weighted standard 
+    deviation is a measure of the spread of a set of numbers, where each 
+    number's contribution to the spread is weighted. The function calculates 
+    the weighted average (mean) of the data, computes the weighted variance 
+    as the average of the squared deviations from the weighted mean, and 
+    then returns the square root of the variance as the standard deviation.
+
+    Parameters:
+    data (array-like): An array, list, or similar structure containing 
+    the data points. The data should be numeric.
+    weights (array-like): An array, list, or similar structure containing 
+    the weights corresponding to each data point. These should be non-negative 
+    numbers and of the same length as the data array.
+
+    Returns:
+    float: The weighted standard deviation of the provided data points.
+
+    Raises:
+    ValueError: If `data` and `weights` have different lengths.
+    ValueError: If any weight is negative.
+
+    Example:
+    >>> data = [1, 2, 3, 4, 5]
+    >>> weights = [1, 2, 3, 4, 5]
+    >>> weighted_std(data, weights)
+    1.4142135623730951
+
+    Note:
+    The weighted standard deviation is useful in datasets where different 
+    observations have varying levels of importance, represented by the 
+    weights. This method differs from the traditional standard deviation 
+    as it takes into account the weight of each data point, offering a 
+    more nuanced view of data variability.
+    """
+
+    if len(data) != len(weights):
+        raise ValueError("Data and weights must have the same length.")
+    if any(w < 0 for w in weights):
+        raise ValueError("Weights must be non-negative.")
     average = np.average(data, weights=weights)
     variance = np.average((data - average)**2, weights=weights)
     return np.sqrt(variance)
 
 
 def average_building_height_with_centroid(buildings, hexagon):
+    """
+    Calculate statistical measures of building heights within a hexagon 
+    based on their centroids.
+
+    This function selects buildings from a GeoDataFrame whose centroids 
+    are within or intersect a specified hexagonal area. It computes various 
+    statistical measures related to the building heights, such as total 
+    height-area product, average height relative to the hexagon area, 
+    weighted average height, and weighted statistical measures like 
+    standard deviation and percentiles.
+
+    Parameters:
+    buildings (gpd.GeoDataFrame): A GeoDataFrame containing building data 
+        with geometry and height information.
+    hexagon (shapely.geometry.polygon.Polygon): A hexagon polygon 
+        representing the area of interest.
+
+    Returns:
+    dict: A dictionary containing the following key-value pairs:
+        - 'centroid_stat_total_height_area': Sum of the product of building 
+            heights and their respective areas.
+        - 'centroid_stat_avg_height_area': Average building height relative 
+            to the hexagon area.
+        - 'centroid_stat_mean': Weighted average of building heights.
+        - 'centroid_stat_std_dev': Weighted standard deviation of building 
+            heights.
+        - 'centroid_stat_min': Minimum building height.
+        - 'centroid_stat_25%': 25th percentile of building heights.
+        - 'centroid_stat_50%': Median (50th percentile) of building heights.
+        - 'centroid_stat_75%': 75th percentile of building heights.
+        - 'centroid_stat_max': Maximum building height.
+
+    Raises:
+    ValueError: If the input is not a valid GeoDataFrame or hexagon polygon.
+
+    Example:
+    >>> hexagon = create_hexagon(-122.34543, 47.65792)
+    >>> buildings_gdf = height_acquire(hexagon)
+    >>> stats = average_building_height_with_centroid(buildings_gdf, hexagon)
+
+    Note:
+    - The function assumes that the 'buildings' GeoDataFrame contains a 'centroid' 
+        column with centroid geometries of buildings.
+    """
+
     # Select buildings whose centroid is within or intersects the hexagon
     buildings_within_hex = buildings[buildings['centroid'].within(hexagon)]
     # Debug print statement - can be removed in production
@@ -165,7 +369,7 @@ def average_building_height_with_centroid(buildings, hexagon):
             'centroid_stat_total_height_area': np.NaN,
             'centroid_stat_avg_height_area': np.NaN,
             'centroid_stat_mean': np.NaN,
-            'centroid_stat_median': np.NaN,
+            # 'centroid_stat_median': np.NaN,
             'centroid_stat_std_dev': np.NaN,
             'centroid_stat_min': np.NaN,
             'centroid_stat_25%': np.NaN,
@@ -175,32 +379,39 @@ def average_building_height_with_centroid(buildings, hexagon):
         }
     # Calculate the product of the area and height for each building
     buildings_within_hex['area_height'] = buildings_within_hex.area * buildings_within_hex['height']
-    print(buildings_within_hex)
+    # Debug print statement - can be removed in productio
+    # print(buildings_within_hex)
 
 
     # Method 1: related to hexagon area
     # Sum the products and divide by the area of the hexagon to get the average height
     total_height_area = buildings_within_hex['area_height'].sum()
     hexagon_area = hexagon.area
-    print(hexagon_area)
+    # Debug print statement - can be removed in productio
+    # print(hexagon_area)
     average_height_area = total_height_area / hexagon_area if hexagon_area != 0 else 0
 
     # Method 2: not related to hexagon area
     weighted_avg = np.average(buildings_within_hex['height'], weights=buildings_within_hex.area)
 
-    median = weighted_median(buildings_within_hex['height'], buildings_within_hex.area)
-    percentile_0 = weighted_percentile(buildings_within_hex['height'], buildings_within_hex.area, 0)
-    percentile_25 = weighted_percentile(buildings_within_hex['height'], buildings_within_hex.area, 25)
-    percentile_50 = weighted_percentile(buildings_within_hex['height'], buildings_within_hex.area, 50)
-    percentile_75 = weighted_percentile(buildings_within_hex['height'], buildings_within_hex.area, 75)
-    percentile_100 = weighted_percentile(buildings_within_hex['height'], buildings_within_hex.area, 100)
+    # median = weighted_median(buildings_within_hex['height'], buildings_within_hex.area)
+    percentile_0 = weighted_percentile(buildings_within_hex['height'], 
+                                       buildings_within_hex.area, 0)
+    percentile_25 = weighted_percentile(buildings_within_hex['height'], 
+                                        buildings_within_hex.area, 25)
+    percentile_50 = weighted_percentile(buildings_within_hex['height'], 
+                                        buildings_within_hex.area, 50)
+    percentile_75 = weighted_percentile(buildings_within_hex['height'], 
+                                        buildings_within_hex.area, 75)
+    percentile_100 = weighted_percentile(buildings_within_hex['height'], 
+                                         buildings_within_hex.area, 100)
     std_dev = weighted_std(buildings_within_hex['height'], buildings_within_hex.area)
 
     return {
         'centroid_stat_total_height_area': total_height_area,
         'centroid_stat_avg_height_area': average_height_area,
         'centroid_stat_mean': weighted_avg,
-        'centroid_stat_median': median,
+        # 'centroid_stat_median': median,
         'centroid_stat_std_dev': std_dev,
         'centroid_stat_min': percentile_0,
         'centroid_stat_25%': percentile_25,
@@ -210,26 +421,6 @@ def average_building_height_with_centroid(buildings, hexagon):
     }
 
 
-
-# aoi_hexagon = create_hexagon(-122.34543, 47.65792)
-# height_acquire(aoi_hexagon)
-
-# # Read in the GeoJSON file for Seattle city limits
-# seattle = gpd.read_file(input_file_from_data_dir("seattle-city-limits.geojson"))
-# # Extract the first geometry object from the GeoDataFrame
-# aoi_geom = seattle.geometry[0]
-# # Change the type to shapely.geometry.polygon.Polygon
-# aoi_shape = shapely.geometry.shape(aoi_geom)
-
-# df1 = height_acquire(aoi_shape)
-# get_centroid(df1)
-
-
-# aoi_hexagon = create_hexagon(-122.34543, 47.65792)
-# building = gpd.read_file(input_file_from_data_dir("seattle_building_footprints.geojson"))
-# new_building = get_centroid(building)
-
-# print(average_building_height_with_centroid(new_building, aoi_hexagon))
 
 
 def seattle_height_acquire():
@@ -295,7 +486,7 @@ def seattle_height_acquire():
     maxy = maxy + 0.001 # maximum latitude
 
     # Define the output file name for the building footprints
-    output_fn = os.path.join("data","example_building_footprints.geojson")
+    output_fn = os.path.join("data","seattle_building_footprints.geojson")
 
 
     # Initialize an empty set to store quad keys
