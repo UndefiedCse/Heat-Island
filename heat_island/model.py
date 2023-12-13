@@ -20,14 +20,19 @@ def get_keys():
         list: list of default keys for features
     """
     centroid = 'centroid_stat_'
-    terrain = 'terrain_stat_'
+    # terrain = 'terrain_stat_'
     # Add or change what features to use or don't use here
-    features = ['Lat', 'Lon', 'Elev (m.)',
-                centroid+'mean', centroid+'std_dev', centroid+'min',
-                centroid+'25%', centroid+'50%', centroid+'75%', centroid+'max',
-                terrain+'mean', terrain+'std_dev', terrain+'min',
-                terrain+'25%', terrain+'50%', terrain+'75%', terrain+'max'
-                ]
+    # features = ['Lat', 'Lon', 'Elev (m.)',
+    #             centroid+'mean', centroid+'std_dev', centroid+'min',
+    #             centroid+'25%', centroid+'50%', centroid+'75%', centroid+'max',
+    #             terrain+'mean', terrain+'std_dev', terrain+'min',
+    #             terrain+'25%', terrain+'50%', terrain+'75%', terrain+'max'
+    #             ]
+    features = [centroid+'total_height_area',
+                centroid+'avg_height_area', centroid+'mean', centroid+'std_dev',
+                centroid+'min', centroid+'25%', centroid+'50%', centroid+'75%',
+                centroid+'max', 'Lat', 'Lon'
+               ]
     return features
 
 
@@ -233,6 +238,9 @@ def save_model(model, scaler, direc: str, fname: str):
 
 # For testing purposes
 # if __name__ == '__main__':
-#     model_path = train('data/example_aggr_hexagon (2).geojson')
+#     model_path = train('data/example_aggr_hexagon (2).geojson', save_path='data/',
+#                        fname='seattle_model.bin'
+#                       )
+#     model_path = 'data/seattle_model.bin'
 #     modeler, scaler = load_model(model_path)
 #     print("complete")
