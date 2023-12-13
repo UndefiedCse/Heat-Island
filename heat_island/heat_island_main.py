@@ -88,12 +88,11 @@ while MOREPOINTS:
         NEW = False
         
     # Call the ML model here?
+    print("Please wait; this might take a moment")
     modelFileDir = input_file_from_data_dir(city + "_model")
     model, scale = load_model(modelFileDir)
 
     # Call functions for applying ML here
-    print('''Please hold on as the algorithm computes
-    the expected temperature within the region.''')
     predictions = predict(model, scale, data)
 
     # Display data currently in code output thing
