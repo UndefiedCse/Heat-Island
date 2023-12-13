@@ -465,7 +465,7 @@ def seattle_height_acquire():
     # }
 
     # Read in the GeoJSON file for Seattle city limits
-    seattle = gpd.read_file(input_file_from_data_dir("seattle-city-limits.geojson"))
+    seattle = gpd.read_file(input_file_from_data_dir("seattle_boundary.geojson"))
     # Extract the first geometry object from the GeoDataFrame
     aoi_geom = seattle.geometry[0]
     # Change the type to shapely.geometry.polygon.Polygon
