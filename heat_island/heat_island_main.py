@@ -13,6 +13,7 @@ from heat_island.data_process import input_file_from_data_dir
 from heat_island.geo_process import create_hexagon
 from heat_island.height_acquire import get_centroid, average_building_height_with_centroid
 from heat_island.height_acquire import height_acquire
+from heat_island.model import train, predict, clean_data, load_model
 
 cities = {"seattle": (47.606, -122.333)}
 EXISTING = False
