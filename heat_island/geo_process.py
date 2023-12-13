@@ -1,24 +1,10 @@
-import pandas as pd
-import geopandas as gpd
 import shapely.geometry
 from shapely.geometry import Polygon
-# from geojson import Feature, Point, FeatureCollection
-# import json
 import math
-# import mercantile
-# from tqdm import tqdm
-# from folium import GeoJson
-# import tempfile
-# import fiona
 import folium
-# import os
-# import requests
-# import rasterio
-# import rasterstats
-# import matplotlib
-# import matplotlib.pyplot as plt
 
-from data_process import input_file_from_data_dir
+
+from heat_island.data_process import input_file_from_data_dir
 
 def create_hexagon(longitude, latitude, radius_meters = 111111 * 0.001):
     """
