@@ -27,19 +27,18 @@ Date: 2023/12/13
 """
 
 
+import os
+import tempfile
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import shapely.geometry
 import mercantile
 from tqdm import tqdm
-import os
-import tempfile
 import fiona
 
 from heat_island.data_process import input_file_from_data_dir
-from heat_island.geo_process import create_hexagon
-
+# from heat_island.geo_process import create_hexagon
 
 
 
@@ -76,7 +75,7 @@ def height_acquire(hexagon):
     - The hexagon should be a valid shapely polygon.
     """
 
-    if type(hexagon) != shapely.geometry.polygon.Polygon:
+    if isinstance(hexagon) != shapely.geometry.polygon.Polygon:
         raise ValueError("polygon is invalid")
 
     # Get the bounds of the area of interest (AOI)
@@ -136,7 +135,7 @@ def height_acquire(hexagon):
         # If no rows are found for a quad key, raise an error
         else:
             raise ValueError(f"QuadKey not found in dataset: {quad_key}")
-        
+      
     return combined_gdf
 
 
@@ -396,15 +395,15 @@ def average_building_height_with_centroid(buildings, hexagon):
     weighted_avg = np.average(buildings_within_hex['height'], weights=buildings_within_hex.area)
 
     # median = weighted_median(buildings_within_hex['height'], buildings_within_hex.area)
-    percentile_0 = weighted_percentile(buildings_within_hex['height'], 
+    percentile_0 = weighted_percentile(buildings_within_hex['height'],
                                        buildings_within_hex.area, 0)
-    percentile_25 = weighted_percentile(buildings_within_hex['height'], 
+    percentile_25 = weighted_percentile(buildings_within_hex['height'],
                                         buildings_within_hex.area, 25)
-    percentile_50 = weighted_percentile(buildings_within_hex['height'], 
+    percentile_50 = weighted_percentile(buildings_within_hex['height'],
                                         buildings_within_hex.area, 50)
-    percentile_75 = weighted_percentile(buildings_within_hex['height'], 
+    percentile_75 = weighted_percentile(buildings_within_hex['height'],
                                         buildings_within_hex.area, 75)
-    percentile_100 = weighted_percentile(buildings_within_hex['height'], 
+    percentile_100 = weighted_percentile(buildings_within_hex['height'],
                                          buildings_within_hex.area, 100)
     std_dev = weighted_std(buildings_within_hex['height'], buildings_within_hex.area)
 
@@ -552,7 +551,7 @@ def seattle_height_acquire():
             # If no rows are found for a quad key, raise an error
             else:
                 raise ValueError(f"QuadKey not found in dataset: {quad_key}")
-            
+
 
         # Merge each temporary GeoJSON files into a single file
         for fn in tmp_fns:
@@ -568,9 +567,11 @@ def seattle_height_acquire():
                         # Remove the 'id' key if it exists
                         if "id" in row:
                             del row["id"]
-                        
-                        # Extract the height value from properties, assuming it's already a direct value and not a dict
-                        height = properties.get('height')  # This assumes that 'height' is directly stored in properties
+
+                        # Extract the height value from properties, 
+                        # assuming it's already a direct value and not a dict
+                        # This assumes that 'height' is directly stored in properties
+                        height = properties.get('height')
 
                         # Create a new properties dictionary with only 'id' and 'height'
                         new_properties = {"id": idx, "height": height}
@@ -600,7 +601,7 @@ def seattle_height_acquire():
             new_properties = {
                 'id': properties['id'],
                 # Get the 'height' value directly from the original properties dictionary
-                'height': properties.get('height') 
+                'height': properties.get('height')
             }
 
             # Check if 'height' value is missing）
