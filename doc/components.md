@@ -16,15 +16,15 @@
     * What it does: Creates a hexagon to determine the area which to include the heights. It is used to find building height information to build the model and to generate data for user-selected points.
     * Inputs: (float) latitude, (float) longitude
     * Returns: (polygon via shapely) hexagon shaped polygon
-* **hex_to_geojson**
-    * Converting said hexagon into a GeoJson file
-    * What it does: Converts the above hexagon polygon into a geojson file for Folium compatability
-    * Input: (polygon via shapely) hexagon shaped polygon, from above method
-    * Returns: **(Folium object(?))**
+ * **height_acquire**
+    * Acquires building height data for a specified hexagonal area.
+    * What it does: takes a hexagon polygon as input, and creates a GeoDataFrame that includes building heights.
+    * Inputs: (shapely.geometry.polygon.Polygon) hexagon
+    * Returns: (goppandas.GeoDataFrame) A GeoDataFrame containing the heights of buildings within the specified hexagon area
 * **average_building_height_with_centroid**
     * Using **shapely polygon** hexagon to find building information 
     * What it does: Finds the average building height within a region of interest
-    * Inputs: **(shapely polygon/GeoJson polygon)** hexagon, **(pd dataframe/dictionary??)** building information
+    * Inputs: (shapely polygon/GeoJson polygon) hexagon, (goppandas.GeoDataFrame) building information
     * Returns: Various statistics related to the distribution of building heights
 
 # Use case 3: Predict temperature of chosen location
