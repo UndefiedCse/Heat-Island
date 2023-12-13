@@ -6,8 +6,6 @@ Key functionalities in the module include acquiring building heights within
 specific areas, calculating geometric centers of shapes, and performing 
 weighted statistical analyses on geographical data. 
 
-
-
 Key Functions:
 - `height_acquire`: Acquires building height data from a specified hexagonal 
     area and returns a GeoDataFrame with these heights.
