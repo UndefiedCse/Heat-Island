@@ -73,7 +73,7 @@ def height_acquire(hexagon):
     - The hexagon should be a valid shapely polygon.
     """
 
-    if isinstance(hexagon) != shapely.geometry.polygon.Polygon:
+    if type(hexagon) != shapely.geometry.polygon.Polygon:
         raise ValueError("polygon is invalid")
 
     # Get the bounds of the area of interest (AOI)
