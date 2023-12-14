@@ -1,3 +1,16 @@
+"""
+test_height_acquire.py: Tests for height_acquire.py
+
+Tests included in this module:
+- test_invalid_polygon_input(): Test the response to invalid polygon inputs.
+- test_valid_polygon_output_type(): Verify the output type from the height acquisition process.
+- test_get_centroid(): Check the addition of 'centroid' column in GeoDataFrame.
+- test_with_multiple_geometries(): Validate the functioning with multiple geometries in a GeoDataFrame.
+
+Set up: 
+python -m unittest discover
+"""
+
 import unittest
 import geopandas as gpd
 import shapely
@@ -8,7 +21,11 @@ from heat_island import data_process
 
 class TestHeight(unittest.TestCase):
     """
-    
+    This test class focuses on verifying the correctness and robustness 
+    of functions in height_acquire.py. It includes tests for validating 
+    input types, output types, and the proper calculation and addition 
+    of centroids to geospatial data frames. 
+
     """
 
     def test_invalid_polygon_input(self):
@@ -40,9 +57,10 @@ class TestHeight(unittest.TestCase):
         self.assertIn('centroid', test_gdf.columns)
 
         # Furthermore, check the type of the centroid column entries
-        self.assertTrue(all(isinstance(geom, shapely.geometry.Point) for geom in test_gdf['centroid']))
+        self.assertTrue(all(isinstance(geom, shapely.geometry.Point) 
+                            for geom in test_gdf['centroid']))
 
-    
+  
     def test_with_multiple_geometries(self):
         """
         Test with Multiple Geometries: 
@@ -55,6 +73,3 @@ class TestHeight(unittest.TestCase):
         self.assertIn('centroid', result_gdf.columns)
         for centroid, geometry in zip(result_gdf['centroid'], geometries):
             self.assertEqual(centroid, geometry)
-
-
-
