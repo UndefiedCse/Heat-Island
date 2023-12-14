@@ -1,11 +1,9 @@
 import unittest
-import numpy as np
 import shapely
 import folium
 
-#import sys, os
-#sys.path.append(os.getcwd())
 from heat_island import geo_process
+
 
 class TestGeo(unittest.TestCase):
     """
@@ -24,8 +22,8 @@ class TestGeo(unittest.TestCase):
 
         # Check if the hexagon has 6 vertices
         self.assertEqual(len(hexagon.exterior.coords), 7)  # Includes closing vertex
-        # The shapely.geometry.Polygon object includes the closing 
-        # vertex in its exterior coordinates, which is why we expect 7 
+        # The shapely.geometry.Polygon object includes the closing
+        # vertex in its exterior coordinates, which is why we expect 7
         # vertices instead of 6.
 
 

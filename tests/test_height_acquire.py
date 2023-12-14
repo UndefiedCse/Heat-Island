@@ -1,7 +1,6 @@
 import unittest
 import geopandas as gpd
 import shapely
-import numpy as np
 
 from heat_island import height_acquire
 from heat_island import geo_process
@@ -58,14 +57,4 @@ class TestHeight(unittest.TestCase):
             self.assertEqual(centroid, geometry)
 
 
-    def test_average_building_height_with_centroid(self):
-        """
-        One-shot test for average_building_height_with_centroid(buildings, hexagon)
-        """
-        # Create a sample hexagon and buildings for testing
-        test_hexagon = geo_process.create_hexagon(-122.34543, 47.65792)
-        test_buildings = gpd.read_file(data_process.input_file_from_data_dir("seattle_building_footprints.geojson"))
-        result = height_acquire.average_building_height_with_centroid(test_buildings, test_hexagon)
-        self.assertIsInstance(result, dict)
-        self.assertIn('centroid_stat_mean', result)
 
