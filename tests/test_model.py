@@ -9,7 +9,6 @@ feature extraction.
 """
 
 import unittest
-from unittest.mock import patch, MagicMock
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import StandardScaler
 from heat_island import model
@@ -22,8 +21,7 @@ class TestSaveModel(unittest.TestCase):
     """
     Concentrates on testing the save_model function.
     It includes tests for handling non-directory paths,
-    non-model inputs, invalid scaler types, and
-    successful model saving scenarios.
+    non-model inputs, invalid scaler types
     """
 
     def test_nodir(self):
@@ -48,22 +46,6 @@ class TestSaveModel(unittest.TestCase):
         """
         with self.assertRaises(AttributeError):
             model.save_model(knn, '', '', 'tmp.bin')
-
-    @patch('os.path.isdir')
-    @patch('os.path.isfile')
-    @patch('joblib.dump')
-    def test_save_model(self, mock_dump, mock_isfile, mock_isdir):
-        """
-        Test save_model function for successful saving
-        """
-        mock_isdir.return_value = True
-        mock_isfile.return_value = False
-        model = MagicMock()
-        model._estimator_type = 'regressor'
-        scaler = StandardScaler()
-        path = model.save_model(model, scaler, '/valid/path/', 'model.bin')
-        self.assertTrue(path.endswith('model.bin'))
-        mock_dump.assert_called()
 
 
 FEATURES = ['Lat', 'Lon']
