@@ -97,7 +97,7 @@ Heat-Island (master)
 |    |    data_process.py
 |    |    geo_process.py
 |    |    height_acquire.py
-|    |    get_building_and_terrain.py
+|    |    terrain_acquire.py
 |    |    getcoor.py
 |    |    model.py
 |
