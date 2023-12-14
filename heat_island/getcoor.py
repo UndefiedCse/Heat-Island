@@ -1,7 +1,16 @@
-"""This module is used to get coordinate from user input and
-check whether the input is inside the boundary
-`make_collection` is used to create 
 """
+This module facilitates the interaction between a user and geographic data.
+It primarily deals with loading city boundaries from GeoJSON files,
+enabling a user to select a specific geographical coordinate
+within these boundaries through an interactive map interface.
+The module leverages libraries such as folium for map rendering,
+shapely for geometric operations,
+and pyperclip for clipboard interactions.
+It is designed to be user-friendly,
+providing clear instructions and
+feedback throughout the process of coordinate selection.
+"""
+
 import json
 import os
 import webbrowser
@@ -12,7 +21,8 @@ import pyperclip
 
 def make_collection(features: list):
     """
-    Make GeometryCollection for locating boundary.
+    Creates a GeometryCollection object
+    representing city boundaries from a list of GeoJSON features.
     Example: make_collection(js['features'])
 
     Args:
@@ -52,8 +62,10 @@ def make_collection(features: list):
 
 
 def open_browser(json_path: str, output_dir: str = ''):
-    """Open browser for user to select point
-        and copy its coordinate to clipboard
+    """
+    Opens a web browser with an interactive map
+    for the user to select a point within the specified city boundary.
+    The coordinate of the selected point is then copied to the clipboard.
 
     Args:
         json_path (str): path to city boundary
@@ -111,7 +123,11 @@ def open_browser(json_path: str, output_dir: str = ''):
 
 
 def select_coordinate(path: str, temp_dir: str = '', save_html: bool = False):
-    """Main function for selecting coordinate
+    """
+    Main function to facilitate the user in selecting a coordinate
+    from the city boundary.
+    It integrates the process of opening the browser,
+    selecting the point, and returning the chosen coordinate.
 
     Args:
         path (str): path to city boundary

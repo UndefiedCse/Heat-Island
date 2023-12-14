@@ -1,5 +1,15 @@
-"""This module is to train KNN regression
-and optimize the best k hyperparameter
+"""
+This module is designed for training and optimizing machine learning models,
+particularly focusing on KNN regression,
+while also considering Linear Regression and Random Forest Regressors.
+It includes functionalities for preparing data,
+selecting the best hyperparameters,
+training models, and evaluating their performance.
+Key operations include data cleaning, standardization, and
+model evaluation using Root Mean Square Error (RMSE).
+The module utilizes libraries such as geopandas, sklearn, and joblib
+for handling geospatial data, machine learning processes,
+and model serialization respectively.
 """
 import os.path
 import joblib
@@ -10,34 +20,33 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
-# from heat_island.data_process import input_file_from_data_dir
 
 
 def get_keys():
-    """Default keys for datafile might be subjected to change
+    """
+    Returns a predefined list of feature keys used in the dataset for model
+    training. These keys include statistical measures
+    related to centroids and geographical coordinates.
 
     Returns:
         list: list of default keys for features
     """
     centroid = 'centroid_stat_'
-    # terrain = 'terrain_stat_'
-    # Add or change what features to use or don't use here
-    # features = ['Lat', 'Lon', 'Elev (m.)',
-    #             centroid+'mean', centroid+'std_dev', centroid+'min',
-    #             centroid+'25%', centroid+'50%', centroid+'75%', centroid+'max',
-    #             terrain+'mean', terrain+'std_dev', terrain+'min',
-    #             terrain+'25%', terrain+'50%', terrain+'75%', terrain+'max'
-    #             ]
     features = [centroid+'total_height_area',
-                centroid+'avg_height_area', centroid+'mean', centroid+'std_dev',
-                centroid+'min', centroid+'25%', centroid+'50%', centroid+'75%',
-                centroid+'max', 'Lat', 'Lon'
-               ]
+                centroid+'avg_height_area', centroid+'mean',
+                centroid+'std_dev',
+                centroid+'min', centroid+'25%', centroid+'50%',
+                centroid+'75%', centroid+'max', 'Lat', 'Lon'
+                ]
     return features
 
 
 def find_best_estimator(x_train, y_train, scaler):
-    """Find the best hyperparameter for KNN, LR, RFR
+    """
+    Conducts hyperparameter tuning for KNN, Linear Regression,
+    and Random Forest Regressor models using GridSearchCV.
+    It evaluates various configurations to determine the optimal settings
+    for each model type based on the training data.
 
     Args:
         x_train (df): training data input
@@ -71,7 +80,11 @@ def find_best_estimator(x_train, y_train, scaler):
 
 
 def get_scores(x_test, y_test, best_estimators, scaler):
-    """Calculate RMSE for each model to check generalization error
+    """
+    Calculates and compares the Root Mean Square Error (RMSE)
+    for each optimized model (KNN, Linear Regression, Random Forest Regressor)
+    using the test dataset.
+    This helps in assessing the generalization performance of each model.
 
     Args:
         x_test (df): testing data feature
@@ -92,7 +105,12 @@ def get_scores(x_test, y_test, best_estimators, scaler):
 def train(data_path: str, features: list = None,
           target: str = 'Ave temp annual_F',
           save_path: str = '', fname: str = 'model.bin'):
-    """Main function for training model
+    """
+     Integrates the complete workflow for training a model,
+     including data preparation,feature selection, model optimization,
+     performance evaluation, and model serialization.
+     It returns the path to the saved model,
+     which is chosen based on the lowest RMSE.
 
     Args:
         data_path (str): path to training dataset
@@ -124,7 +142,11 @@ def train(data_path: str, features: list = None,
 
 
 def predict(model, scale, raw_x):
-    """predict function for the model
+    """
+    Utilizes a trained regression model and a standard scaler
+    to make predictions on a given dataset.
+    This function standardizes the input data and
+    then applies the model to generate predictions.
 
     Args:
         model (Regressor model): model instance for prediction
@@ -140,7 +162,12 @@ def predict(model, scale, raw_x):
 
 
 def clean_data(data_path: str, features: list, target: str):
-    """Read data from file and clean all na value for next process
+    """
+    Reads and preprocesses data from a GeoJSON file,
+    ensuring that the dataset only contains specified features and
+    targets without any missing values.
+    It prepares the data for further processing and
+    analysis in machine learning workflows.
 
     Args:
         data_path (str): path to data file (.geojson)
@@ -168,7 +195,11 @@ def clean_data(data_path: str, features: list, target: str):
 
 
 def load_model(path: str):
-    """Load model with the same format as save_model
+    """
+    Facilitates the loading of a previously saved machine learning model
+    and its corresponding scaler from a specified file path.
+    This function ensures the model and scaler are correctly retrieved
+    for future use.
 
     Args:
         path (str): path to saved model file
@@ -195,7 +226,11 @@ def load_model(path: str):
 
 
 def save_model(model, scaler, direc: str, fname: str):
-    """Function for saving the model into the computer for later use
+    """
+    Handles the saving of a trained regression model and
+    its scaler to a specified directory, allowing for the model's reuse.
+    The function ensures that the model is stored correctly and
+    can be easily accessed for future predictions.
 
     Args:
         model (regressor): regression model
@@ -235,12 +270,3 @@ def save_model(model, scaler, direc: str, fname: str):
     joblib.dump(output, direc+fname)
     print(f"Save file at {direc+fname}")
     return direc+fname
-
-# For testing purposes
-# if __name__ == '__main__':
-#     model_path = train('data/example_aggr_hexagon (2).geojson', save_path='data/',
-#                        fname='seattle_model.bin'
-#                       )
-#     model_path = 'data/seattle_model.bin'
-#     modeler, scaler = load_model(model_path)
-#     print("complete")
