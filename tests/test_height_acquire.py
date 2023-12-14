@@ -57,10 +57,10 @@ class TestHeight(unittest.TestCase):
         self.assertIn('centroid', test_gdf.columns)
 
         # Furthermore, check the type of the centroid column entries
-        self.assertTrue(all(isinstance(geom, shapely.geometry.Point) 
+        self.assertTrue(all(isinstance(geom, shapely.geometry.Point)
                             for geom in test_gdf['centroid']))
 
-  
+
     def test_with_multiple_geometries(self):
         """
         Test with Multiple Geometries: 
