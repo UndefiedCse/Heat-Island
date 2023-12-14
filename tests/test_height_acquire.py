@@ -58,14 +58,13 @@ class TestHeight(unittest.TestCase):
             self.assertEqual(centroid, geometry)
 
 
-    def test_with_valid_inputs(self):
+    def test_average_building_height_with_centroid(self):
+        """
+        One-shot test for average_building_height_with_centroid(buildings, hexagon)
+        """
         # Create a sample hexagon and buildings for testing
-        test_hexagon = shapely.geometry.Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
-        test_buildings = gpd.GeoDataFrame({
-            'geometry': [shapely.geometry.Point(0.5, 0.5), shapely.geometry.Point(1.5, 1.5)],
-            'height': [10, 20],
-            'centroid': [shapely.geometry.Point(0.5, 0.5), shapely.geometry.Point(1.5, 1.5)]
-        })
+        test_hexagon = geo_process.create_hexagon(-122.34543, 47.65792)
+        test_buildings = gpd.read_file(data_process.input_file_from_data_dir("seattle_building_footprints.geojson"))
         result = height_acquire.average_building_height_with_centroid(test_buildings, test_hexagon)
         self.assertIsInstance(result, dict)
         self.assertIn('centroid_stat_mean', result)
