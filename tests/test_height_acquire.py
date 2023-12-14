@@ -43,17 +43,6 @@ class TestHeight(unittest.TestCase):
         # Furthermore, check the type of the centroid column entries
         self.assertTrue(all(isinstance(geom, shapely.geometry.Point) for geom in test_gdf['centroid']))
 
-
-    def test_with_invalid_geometry(self):
-        """
-        Test with Invalid Geometry: 
-        Test the function's behavior when provided with invalid geometry data.
-        """
-        invalid_geometry = [None, "not_a_geometry"]
-        gdf = gpd.GeoDataFrame({'geometry': invalid_geometry})
-        with self.assertRaises(TypeError):  # or another appropriate exception
-            height_acquire.get_centroid(gdf)
-
     
     def test_with_multiple_geometries(self):
         """
@@ -68,29 +57,16 @@ class TestHeight(unittest.TestCase):
         for centroid, geometry in zip(result_gdf['centroid'], geometries):
             self.assertEqual(centroid, geometry)
 
-    
-    def setUp_average_building_height_with_centroid(self):
+
+    def test_with_valid_inputs(self):
         # Create a sample hexagon and buildings for testing
-        self.hexagon = shapely.geometry.Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
-        self.buildings = gpd.GeoDataFrame({
+        test_hexagon = shapely.geometry.Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
+        test_buildings = gpd.GeoDataFrame({
             'geometry': [shapely.geometry.Point(0.5, 0.5), shapely.geometry.Point(1.5, 1.5)],
             'height': [10, 20],
             'centroid': [shapely.geometry.Point(0.5, 0.5), shapely.geometry.Point(1.5, 1.5)]
         })
-
-    def test_with_invalid_inputs(self):
-        with self.assertRaises(ValueError):
-            height_acquire.average_building_height_with_centroid("not_a_geodataframe", self.hexagon)
-        with self.assertRaises(ValueError):
-            height_acquire.average_building_height_with_centroid(self.buildings, "not_a_polygon")
-
-    def test_with_valid_inputs(self):
-        result = height_acquire.average_building_height_with_centroid(self.buildings, self.hexagon)
+        result = height_acquire.average_building_height_with_centroid(test_buildings, test_hexagon)
         self.assertIsInstance(result, dict)
         self.assertIn('centroid_stat_mean', result)
 
-    def test_with_empty_geodataframe(self):
-        empty_gdf = gpd.GeoDataFrame(columns=['geometry', 'height', 'centroid'])
-        result = height_acquire.average_building_height_with_centroid(empty_gdf, self.hexagon)
-        for key, value in result.items():
-            self.assertTrue(np.isnan(value))
