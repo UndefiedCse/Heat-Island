@@ -29,12 +29,24 @@
 
 # Use case 3: Predict temperature of chosen location
 * **train**
-    * Trains ML model
-    * What it does: Trains the machine learning model based on the building heights and the corresponding weather. The model is automatically saved within our model folder
-    * Input: (str) path to the file with the training dataset **(contains building heights, weather info)**, **?? Not sure what else goes here**
+    * The main function for training the model. It handles data cleaning, splitting, model training, and evaluation.
+    * What it does:
+        * Get the dataset from **clean_data** 
+        * Split dataset into training dataset and test dataset
+        * Standardize the features
+        * Train linear regression, K-nearest neighbor, and Random Forest Regression usig **find_best_estimator**
+        * Save the best model according to score from **get_scores**
+    * Input: (str) Path to training dataset, optional list of feature keys, (str, optional) target column name, optional save directory, and file name for the model.
     * Returns: (str) path to the saved model
+ * **clean_data**
+    * Reads and cleans data from a file, preparing it for further processing in **train**
+    * What it does:
+        * Load the training dataset from the file path
+        * Remove all rows with missing value
+    * Input: (str) path to training dataset file, (list) list of feature column's name, (str) output column name
+    * Return: (dataframe) dataframe of features, (Series) Series of annual average temperature in fahrenheit
  * **load_model**
-    * Retrieves model from model folder
+    * Retrieves model from model file
     * What it does: Retrieves the model that has either been preset (Seattle) or has been saved by the train function from above.
     * Inputs: (str) path to the file with the model = output of train
     * Returns: (regressor) the ML trained model, (sklearn.preprocessing) the scaler associated with the model
