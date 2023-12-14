@@ -60,7 +60,7 @@ A map will be displayed using an existing library called Folium. From here, user
 
 ## Installation
 - Create a virtual environment based on the environment dependency. `conda env create -f environment.yml`
-- Run the main page, 'heat_island_main.py'.
+- Run the main page. `python heat_island_main.py`
 
 ## Directory Structure
 ```
@@ -74,6 +74,7 @@ Heat-Island (master)
 |----- .github/workflows
 |    |    python-flake8.yml
 |    |    python-unittest.yml
+|    |    python-pylint.yml
 |
 |----- doc
 |    |    user-story.md
