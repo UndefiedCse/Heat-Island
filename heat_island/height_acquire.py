@@ -36,7 +36,6 @@ from tqdm import tqdm
 import fiona
 
 from heat_island.data_process import input_file_from_data_dir
-# from heat_island.geo_process import create_hexagon
 
 
 
@@ -133,7 +132,7 @@ def height_acquire(hexagon):
         # If no rows are found for a quad key, raise an error
         else:
             raise ValueError(f"QuadKey not found in dataset: {quad_key}")
-      
+
     return combined_gdf
 
 
@@ -420,7 +419,6 @@ def average_building_height_with_centroid(buildings, hexagon):
 
 
 
-
 def seattle_height_acquire():
     """
     Acquires building height information for Seattle city limits and 
@@ -566,7 +564,7 @@ def seattle_height_acquire():
                         if "id" in row:
                             del row["id"]
 
-                        # Extract the height value from properties, 
+                        # Extract the height value from properties,
                         # assuming it's already a direct value and not a dict
                         # This assumes that 'height' is directly stored in properties
                         height = properties.get('height')
@@ -605,7 +603,7 @@ def seattle_height_acquire():
             # Check if 'height' value is missing）
             if new_properties['height'] is None or new_properties['height'] == -1:
                 # Skip that polygon without height
-                continue 
+                continue
 
             # Construct a new row dictionary to match the schema
             new_row = {
