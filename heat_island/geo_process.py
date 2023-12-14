@@ -1,9 +1,22 @@
+"""
+geo_process.py: geographical data process functions for heat_island 
+
+Functions:
+- create_hexagon: Generates a regular hexagon centered at a given latitude and longitude. 
+
+- `hex_to_geojson`: Converts a hexagonal shape into a GeoJSON object using Folium. 
+
+Note:
+- Longitude should be entered before latitude.
+
+Author: @LilacHo
+Date: 2023/12/13
+"""
+
+import math
 import shapely.geometry
 from shapely.geometry import Polygon
-import math
 import folium
-
-from heat_island.data_process import input_file_from_data_dir
 
 
 def create_hexagon(longitude, latitude, radius_meters = 111111 * 0.001):

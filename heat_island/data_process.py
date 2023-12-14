@@ -6,6 +6,9 @@ Functions:
         inside the 'data' directory and output input file path.
     preprocess_csv(input_file_name): Drop the rows contains missing 
         temprature data and the duplicates weather station.
+
+Author: @LilacHo
+Date: 2023/12/13
 """
 
 
@@ -33,7 +36,7 @@ def input_file_from_data_dir(input_file_name):
     Example usage:
     print(input_file_from_data_dir('weather_Seattle.csv'))
     """
-    
+  
     # Get the absolute path to the directory where data_process.py is located
     current_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,39 +71,39 @@ def preprocess_csv(input_file_name):
     as the input file.
 
     Returns:
-    df: The absolute path of the file within the 'data' directory.
+    d_f: The absolute path of the file within the 'data' directory.
 
     Example usage:
     preprocess_csv('weather_Seattle.csv')
     """
-  
+
     # Construct the file path
     input_file_path = input_file_from_data_dir(input_file_name)
 
     # Load the CSV file into a dataframe
-    df = pd.read_csv(input_file_path)
+    d_f = pd.read_csv(input_file_path)
     # Debug print statement - can be removed in production
-    print(df) # print original dataframe
+    print(d_f) # print original dataframe
 
     # Drop the rows where temprature is missing
-    df = df.dropna(subset=['Ave temp annual_F'])
+    d_f = d_f.dropna(subset=['Ave temp annual_F'])
 
     # Drop duplicates based on the 'Station ID' column
     # This will keep only the first occurrence of each unique ID
-    df = df.drop_duplicates(subset=['Station ID'])
+    d_f = d_f.drop_duplicates(subset=['Station ID'])
 
     # Drop the 'Note' column
-    df = df.drop(columns=['Note'])
+    d_f = d_f.drop(columns=['Note'])
     # Debug print statement - can be removed in production
-    print(df) # print the modified dataframe
+    print(d_f) # print the modified dataframe
 
     # Construct the output file path to save in the same directory as input file
     output_file_name = 'processed_' + input_file_name
     output_file_path = os.path.join(os.path.dirname(input_file_path), output_file_name)
-    
+
     # Save the processed DataFrame back to CSV
-    df.to_csv(output_file_path, index=False)
+    d_f.to_csv(output_file_path, index=False)
 
     print(f"Processed file saved as: {output_file_path}")
 
-    return df
+    return d_f

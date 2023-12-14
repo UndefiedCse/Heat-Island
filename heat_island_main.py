@@ -36,7 +36,7 @@ while not EXISTING:
         coordNew = input("What is the latitude/longitude coordinates of this city?")
         cities[city] = coordNew
 
-        # Requests required data for new model formation/new height info       
+        # Requests required data for new model formation/new height info
         print('''Move your weather data into the 'data' directory, using the following
         format: 'city_weather'. e.g. 'seattle_weather'.''')
         filler = input("Press any key to continue")
@@ -49,7 +49,7 @@ while not EXISTING:
 
         radius = input("Please set the radius used for ML Training. Enter 0 for default.")
         EXISTING = True
-        NEW = True       
+        NEW = True
     else:
         print("This is not a valid response. Please either type a city name or 'New'.")
         response = input("What city would you like to view? Type 'New' for a new city.")
@@ -84,12 +84,12 @@ while MOREPOINTS:
 
     # If new city (i.e. no model yet), train
     if NEW:
-        print("Please wait as the model trains on the new data.")    
+        print("Please wait as the model trains on the new data.")
         # Cleans data
         data = clean_data(building_stats)
         train(data, fname = city + "_model.bin")
         NEW = False
-        
+
     # Call the ML model here?
     print("This will take time. Please wait.")
     modelFileDir = input_file_from_data_dir(city + "_model.bin")
@@ -105,11 +105,11 @@ while MOREPOINTS:
     # Display data - What will it look like? Will create a folium pop-up regardless; can be a graph
     # or (various heights with various temperature predictions), or just a line of text as popup
     # and a text here directly.
-    # Chart visualization look here: 
+    # Chart visualization look here:
     # https://python-visualization.github.io/folium/latest/user_guide/ui_elements/popups.html
     # Look at the Vega/Vega Lite Charts
     print(f'Temperature prediction is {predictions}')
-    
+
     more = ''
     while more not in ('y', 'n'):
         more = input("Would you like to test more points? (y/n) \n")
